@@ -50,28 +50,30 @@
    - 在Git生成ssh key（这个ssh key也可以用于gitee等其他支持Git的平台）
       - 在Git bash控制台上输入：`ssh-keygen -t rsa -C "2693828240@qq.com"`（不要出现中文引号，ssh后没有空格）；然后三次回车就可以完成ssh key的生成；可以`cd ~/.ssh`目录后用less命令查看id_rsa.pub文件的内容或者进入C盘的目录下找到这个文件；复制这个文件的全部内容；
          - id_rsa是私钥（私钥只保存在本地，也可以设置私钥的密码，但我没有）、id_rsa.pub是公钥（用于与github等平台建立连接）；如果换一台电脑，可以将私钥和公钥复制到新电脑的同一目录，但建议重新生成）
-         - <a href="https://imgse.com/i/pEmApM6"><img src="https://s21.ax1x.com/2025/02/07/pEmApM6.png" alt="pEmApM6.png" border="0"></a>     
+         - <a href="https://imgse.com/i/pEmApM6"><img src="https://s21.ax1x.com/2025/02/07/pEmApM6.png" alt="pEmApM6.png" border="0" width="80%" height="80%"/></a>     
    - 给github配置ssh key（配置公钥）
       - 进入github账户的设置，找到SSH and GPG key，选择add new SSH key，填好标题和上面复制的key，点击完成即可；（一般选择Authentication key）
-      - <a href="https://imgse.com/i/pEmkzxx"><img src="https://s21.ax1x.com/2025/02/07/pEmkzxx.png" alt="pEmkzxx.png" border="0"></a>         
+      - <a href="https://imgse.com/i/pEmkzxx"><img src="https://s21.ax1x.com/2025/02/07/pEmkzxx.png" alt="pEmkzxx.png" border="0" width="80%" height="80%"/></a>         
    - 将Git与github连接（因为github已经配置了公钥）
       - ssh -T git@github.com
-      - <a href="https://imgse.com/i/pEmkOIJ"><img src="https://s21.ax1x.com/2025/02/07/pEmkOIJ.png" alt="pEmkOIJ.png" border="0"></a>
-2. 将本地项目上传到github仓库
-   - 首先在github上新建一个仓库，复制到其仓库链接（比如我的临时仓库 https://github.com/zangvvv/test_repo.git）
-   - 构建本地项目的Git仓库/将本地项目用Git管理：
+      - <a href="https://imgse.com/i/pEmkOIJ"><img src="https://s21.ax1x.com/2025/02/07/pEmkOIJ.png" alt="pEmkOIJ.png" border="0" width="80%" height="80%"/></a>
+2. 将本地项目上传到github
+   - 首先在github上新建一个远程仓库，复制到其仓库链接（比如我的临时仓库 https://github.com/zangvvv/test_repo.git）
+   - 构建本地项目的本地Git仓库/将本地项目用Git管理：
       - 在本地项目的目录右击进入Git bash控制台（也可以cd进入），输入下面的代码，将本地项目建立成Git仓库：
-         - `git init` # 一次就行，后面不用再init啦
-         - `git add .`
+         - `git init` # 初始化一次就行，后面不用再init啦
+         - `git add .`，建议直接使用`git init -b main`
          - `git commit -m "本次提交的描述"`
-         - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0"></a>
-   - 将本地Git仓库与github仓库关联：
-      - 输入`git remote add origin https://github.com/zangvvv/test_repo.git`
-   - 上传本地项目到github
+         - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0" width="70%" height="80%"/></a>
+   - 将本地Git仓库与github远程仓库关联：
+      - 输入`git remote add origin https://github.com/zangvvv/my_personal_repo.git`
+   - 上传本地项目到github：
       - 输入`git push -u origin main -f`
-         1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0"></a>
-         2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0"></a>
+         1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0" width="80%" height="80%"/></a>
+         2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0" width="80%" height="80%"/></a>
       - 其它相关
+         - 报错：error: src refspec main does not match any
+           - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。
          - 关于main和master branch：
             - branch是Git中指向提交记录的可移动指针，用于在同一个仓库中管理多个开发路线；在团队协作中，每个开发者通常会在自己的分支上工作，完成后通过 Pull Request 提交更改。
             - Git 2.28版本（2020年）以后，默认项目的开发的主干分支由master改为main，可以使用git branch -M main将之前的分支名改为main；可以git branch查看分支名称；
@@ -91,4 +93,5 @@
       - `git add .`
       - `git commit -m "final_test"`
       - `git push`
-      - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0"></a>
+      - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0" width="60%" height="70%"/></a>
+ 
