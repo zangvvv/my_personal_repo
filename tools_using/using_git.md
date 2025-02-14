@@ -5,14 +5,14 @@
 - Git的三个概念：commit（提交，就是提交项目开发过程的历史记录）、repository（仓库，差不多是代码所在的文件，对应Github的项目首页）、branch（分支，可以根据不同的人和物在当前代码中开辟不同的分支）；Github就是将Git共享到网络上；
 ## 二、github网站的使用
 1. [下载别人项目的代码、上传自己的项目代码](https://www.bilibili.com/video/BV1hS4y1S7wL/?spm_id_from=333.337.search-card.all.click)
-   - 在github将别人项目的源码打包下载
+   - 如何在github将别人项目的源码打包下载
    点击源码右上角的Code，选择Download ZIP即可，这个项目下的所有文件和文件夹都会被下载下来。（而且不需要登录就可下载）
-   - 在github上创建自己的新项目
+   - 如何在github上创建自己的新项目
    点击右上角头像左边的加号，选择create a new repository，然后起名、描述、选择add a README file后github会给你生成一个README.md文件，其余默认即可完成创建。
       - 上传文件：在自己的项目右上角选择Add file，点击Upload files，然后从本地拖动到github后点击commit change即可。（直接拖动没有Git的版本控制等作用）
       - github支持在线修改代码（小铅笔图标）
-      - 删除仓库：settings-general拉到最底部就行；删除文件：点击文件-右上角三点标志-选择delete file-点击commit changes才算完全删除。
-2. 其它
+      - 删除仓库：进入settings-general，拉到最底部就可以看到该选项；删除文件：点击文件-右上角三点标志-选择delete file-点击commit changes才算完全删除。
+2. 其它相关
    - 在源码区域的下面会自动显示源码中的README.md文件的内容；
    - 作者的一个Repository就是一个项目；issue可以完成与作者或其他友友互动，如果是自己的项目可以关闭话题；
    - watch、star和fork的区别
@@ -20,8 +20,8 @@
      - star就是收藏这个项目；
      - fork就是参与到这个项目中，相当于你将当前状态下的原项目copy了一份，然后对其进行优化和改动；
 ## 三、[版本控制软件Git的使用](https://www.bilibili.com/video/BV1Cr4y1J7iQ?spm_id_from=333.788.videopod.sections&vd_source=2523c7055f0985a7f47ca59739b6b086)
-1. Git软件下载和安装
-   - Git - Downloading Package ([git-scm.com](https://git-scm.com/downloads/win))
+1. Git软件下载、安装与进入
+   - 进入Git官网下载 ([git-scm.com](https://git-scm.com/downloads/win))
    - 目前选择的是Setup，一路下一步即可，放在D:\LenovoSoftstore\Git目录下；
    - 安装好之后右击桌面菜单（在任意目录中右击都有）里会多了两个Git的选项；选择Git Bash进入Git控制台；
 2. 使用Git

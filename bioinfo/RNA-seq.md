@@ -210,17 +210,89 @@
             - 常用的软件有star、hisat2（基于bowtie2）、tophat（基于bowtie，tophat2基于bowtie2）、subread；
             - 大多数物种的mark的ratio（也就是比对到参考基因组的reads比例）在75%-90%；
         - 教程
-            - [Tophat2比对原理及命令](https://mp.weixin.qq.com/s/v553kZ8SrpOxhvm6kIultQ)  
-        - 使用tophat2软件进行比对
+            - [Tophat2比对原理及命令-2018-07](https://mp.weixin.qq.com/s/v553kZ8SrpOxhvm6kIultQ)
+            - [使用tophat2和cufflinks组合进行有参转录组分析(较详细,还涉及安装的报错处理)-2023-02](https://mp.weixin.qq.com/s/EtYSc_q1gyDDu9DZxR7VGA)
+            - [Tophat2 & Bowtie2 Tutorial (MAC)(视频教程）-2015-08](https://www.youtube.com/watch?v=7_yY-PuVN3U)
+            - [生信软件|bowtie2（测序序列与参考序列比对）-2023-06](https://blog.csdn.net/u011262253/article/details/79833969)
+            - [转录组学助力：索引文件构建(tophat2、star、hisat2简单使用)-2023-11](https://mp.weixin.qq.com/s/9RdWTbu3XS5q1lwk_UitNg)
+            - [转录组学初体验 ｜ 2.4 Tophat与Tophat2（参数--threads是不是写错的，还有tophat2比对的命令也有错误，不用.fa）-2024-06](https://mp.weixin.qq.com/s/VbXYw1a4MEzWXMYkcQSRcA)
+        - 使用tophat2软件进行比对(目前不太用，速度慢，到2016年已停止更新)
+            1. 在基因组网站上下载基因组文件和对应的注释文件
+                - yotube视频直接在ensembl上下载的是genome.fa而不是toplevel，而且这个细菌基因组很小，建立索引时直接一个文件名和前缀就完了；
+                - 水稻MH63应该下载的是dna_index下面的toplevel.fa.gz那个吧。ensembl上的注释文件倒是只有一个。具体要参考文献吧。
+            2. 使用bowtie2软件来对基因组文件建立索引（5-10min）
+                - 简介与安装
+                    - 想要使用tophat2，首先要下载待研究物种的bowtie index文件，bowtie网站提供了一些物种的index文件，如果没有（水稻只有一个build4版本），需要先用bowtie2(bowtie2-build)建立你的index文件。 
+                    - 和bwa一样用于短reads的比对软件，bowtie主要用于50-1000bp的reads进行比对，生产SAM文件。
+                    - 直接用conda安装（出现HTTP error，可改用直接在login端口下载而不是在compute01端口）。
+                - 简单用法
+                    - 主要命令：`bowtie2-build [options] <reference_genome> <genome_index_prefix>`（可以输入`bowtie2-build -h`查看该子命令帮助文档）
+                        - -f:指定参考基因组文件为fasta格式，默认就是，所以可以不用写； 
+                        - -threads|-p:运行线程数量（bowtie2-build好像改成了-t这个选项）；
+                        - --large-index:使用较大的索引。一般情况下基因组大于4G的时候，考虑使用大索引。
+                        - reference_genome:输入的基因组文件路径；
+                        - genome_index_prefix：输出的索引文件的前缀，比如`xx/xx`；结束后得到6个索引文件例如BanmaoChr.1.bt2l、BanmaoChr.2.bt2l、BanmaoChr.3.bt2l、BanmaoChr.4.bt2l、BanmaoChr.rev.1.bt2l、BanmaoChr.rev.2.bt2l、BanmaoChr.fa；
+                        - **注意**：索引文件和基因组文件前缀需要一致；而且最好将fasta的基因组文件和生成的索引文件放在一个目录下，不然tophat2运行过程还会自动生成，也就是可能有一个tophat_out文件夹产生，里面包含fasta的基因组文件。
+            3. 使用tophat2进行比对
+                - 简介与安装（源码安装）
+                    - TopHat2的安装是依赖Bowtie2的（当然Bowtie1也是可行的）；TopHat2容错率很低，并不会因为没有比对上就而截短Read从而去比对上，所以低质量的碱基比对的效果可能不是那么好。此外，TopHat2可以察觉基因组的易位，将Read比对到潜在的融合转录子上。
+                    - conda一键安装时注意直接写tophat而不是写tophat2，还是用login端口；tophat的安装除了依赖bowtie2还依赖samtools和boost，安装好了这俩还一直solving environment。直接使用源码安装（当然还是要下载bowtie2）：
+                        - 安装教程：[ubuntu中tophat2安装（知乎）-2020-12](https://zhuanlan.zhihu.com/p/339781741)
+                        - [tophat2官网中获取到右下角的Linux x86_64 binary的下载连接](https://ccb.jhu.edu/software/tophat/tutorial.shtml)
+                        - 使用wget下载后，将路径添加到系统路径（`export PATH=path_to_/tophat-2.1.1.Linux_x86_64/:$PATH`），最好`source ~/.bashrc`一下；然后输入`tophat2 -h` 测试是否能正常使用，应该会报错`SyntaxError:invalid syntax`：
+                            - <a href="https://imgse.com/i/pEuh7o4"><img src="https://s21.ax1x.com/2025/02/13/pEuh7o4.png" alt="pEuh7o4.png" border="0"></a>
+                        - 原因应该是tophat2使用的是python2；解决方法如下：输入`whereis python2`找到系统中的python2.7的路径，我用的是`/usr/bin/python2.7`这个，如果后面报错无权限就再换一个路径即可；然后进入文件夹tophat-2.1.0.Linux_x86_64/下，`vim tophat`进入tophat配置文件，将`将#！/usr/bin/env python`修改成刚刚的`/usr/bin/python2.7`，保存后再次测试`tophat2 -h`验证是否成功。
+                            - <a href="https://imgse.com/i/pEuhbFJ"><img src="https://s21.ax1x.com/2025/02/13/pEuhbFJ.png" alt="pEuhbFJ.png" border="0"></a>  
+                - 简单用法
+                    1. 直接进行mapping：`tophat2 -p 6 -G {species.gff3|species.gtf} -o {output_folder} {genome_index_prefix} {test_R1_cutadapt.fq.gz} {test_R2_cutadapt.fq.gz}`
+                        - -p：线程数；
+                        - -G：后面接相应参考基因组的注释文件的路径（gtf或gff），如果注释文件存在的话，在运行时会首先被tophat2调用bowtie2建立转录组的index（这个过程会占用一定的时间，建议事先准备好转录组索引以节约后续比对的时间），读长将会优先根据转录组索引进行比对；
+                            - 生成的结果文件：GRCh37.74.tr.1.bt2、GRCh37.74.tr.2.bt2、GRCh37.74.tr.3.bt2、GRCh37.74.tr.4.bt2、GRCh37.74.tr.fa、GRCh37.74.tr.fa.tlst、GRCh37.74.tr.gff、GRCh37.74.tr.rev.1.bt2、GRCh37.74.tr.rev.2.bt2、GRCh37.74.tr.ver。
+                        - -o：文件输出目录的路径，输出的文件包含；
+                        - {genome_index_prefix}:基因组索引文件的目录路径+前缀，如`xx/xx/xxx`，此处还是要注意索引文件和基因组文件前缀需要一致；
+                        - -r:成对的reads之间的平均inner距离，默认为50。
+                        - --library-type  Tophat2处理的reads具有链特异性。一般Illumina数据的默认library-type为fr-unstranded。
+                        - 记住最后两个是clean的文件；如果出现`Warning:could not find FASTA file bowtie2_index/xxx`可能就是你没有将基因组文件和基因组索引文件放在一个目录下；没啥太大影响；
+                    2. 先生成转录组索引，再进行mapping:
+                        - 主要命令：`tophat2 -G {species.gff3|species.gtf} --transcriptome-index={transcriptome_index_prefix} {genome_index_prefix}`
+                            - -G：接注释文件(gff或gtf)；
+                            - --transcriptome-index：接生成的一系列转录组索引文件的目录路径+前缀（教程示例是在{genome_index_prefix}的基础上加一个`.tr后缀`；
+                            - {genome_index_prefix}:bowtie2生成的基因组索引的目录路径+前缀；
+                            - **注意**：基因组索引里染色体的名称一定要和gtf或gff注释文件的里的相同，否则可能会报错`Couldn't build bowtie index with err=1`，可以用sed修改。
+                        - 主要命令: `tophat2 –p 20 –o {output_folder} --transcriptome-index={transcriptome_index_prefix} {genome_index_prefix} {reads_1.fa} {reads_2.fa}`
+                            - -o：文件输出目录的路径；
+                            - .gz结尾压缩的Read是可以直接使用的，但是.tgz 或者 .tar.gz结尾的压缩文件是需要被解压后才能使用。
+                    - tophat2生成的结果文件：
+                        - accepted_hits.bam：以BAM文件的形式储存着比对信息，这些比对信息是依据染色体的顺序排列储存的；可用samtools查看，如果第一行中出现`SO:coordinate`——指bam文件已经按照基因组坐标排序过了；是后面cufflinks的输入文件。
+                        - junctions.bed：是以Bed格式储存着发现的剪接位点，每个位点都含有左右两个部分，每个部分长度是Read能够跨越剪接位点匹配到基因组的最远距离，最终的得分是跨越剪接位点的Read数量。
+                        - insertions.bed：包含着查询到的插入位点信息，chromLeft指的是插入到基因组的位置。
+                        - deletions.bed：包含着查询到的缺失位点信息，chromLeft指的是缺失片段的第一个碱基。
+                        - unmapped.bam：没有map上的序列
+                        - align_summary.txt能够显示比对效率以及多少Read能够多处比对；`concordant pair alignment rate`显示比对率，一般75-90%，如果是某几条染色体则会相应降低。
+        - 使用star软件进行比对（快且结果准确但占内存，笔电切勿使用）
             - 简介与安装
-                - TopHat2的安装是依赖Bowtie2的（当然Bowtie1也是可行的）；TopHat2容错率很低，并不会因为没有比对上就而截短Read从而去比对上，所以低质量的碱基比对的效果可能不是那么好。此外，TopHat2可以察觉基因组的易位，将Read比对到潜在的融合转录子上。
-                - 
-            1. 对基因组文件建立索引
-                - 使用bowtie2软件来对基因组文件建立索引
-                    - 简介与安装
-                        - 和bwa一样用于短reads的比对软件，bowtie主要用于50-1000bp的reads进行比对，生产SAM文件。
-                        - 直接用conda一直报错HTTPerror，明天再试试，或者换个镜像，不行就尝试用源码安装
-                    - 简单用法 
+                - STAR是一个专门用于RNA-seq数据映射的比对工具，它在变异检测方面具有更好的灵敏度，被用于GATK最佳时间工作流程。和tophat一样也需要先构建基因组索引后进行比对。
+                - conda一键安装。
+            - 简单用法（超长的说明文档）
+                1. 下载物种的参考基因组文件和注释文件
+                2. 使用star软件建立index
+                    - 主要命令：`STAR --runMode genomeGenerate [options] --genomeDir /path/to/genomeDir`
+                        - --runMode genomeGenerate：运行模式，genomeGenerate模式用于构建基因组索引；
+                        - --runThreadN {int}：使用的线程数（处理器数） 
+                        - --genomeDir path_star_index：存储基因组索引的目录路径
+                        - --genomeFastaFiles Athaliana_TAIR10.fasta：FASTA格式的参考基因组文件路径；
+                        - --sjdbGTFfile Athaliana_gene.gtf：用于基因注释的GTF文件（可选）
+                        - --sjdbOverhang 149：剪接位点周围的读取长度.对于sjdbOverhang参数，一般为读取长度-1（或最大读取长度-1）。例如，如果您的读取长度为150，该值应为149。在大多数情况下，默认值100也有效。
+                3. 使用star比对
+                    - 主要命令：`STAR --runMode alignReads [options]... --genomeDir /path/to/genome/index/ --readFilesIn R1.fq R2.fq`
+                        - --runThreadN {int}:线程数
+                        - --genomeDir:建立好的index文件存放路径
+                        - --readFilesIn:input fastq文件
+                        - --readFilesCommand zcat:当input fastq文件是压缩格式时，这里必须指定
+                        - --sjdbGTFfile:基因组注释gtf文件路径，当提供该参数后，可以直接对mapping后的结果进行注释计数
+                        - --outSAMtype BAM SortedByCoordinate:输出排序后的bam文件
+                        - --outFileNamePrefix Output_prefix:输出文件的前缀名
+                        - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile 
         - <a href="https://imgse.com/i/pEnG9KS"><img src="https://s21.ax1x.com/2025/02/10/pEnG9KS.png" alt="pEnG9KS.png" border="0"></a>
 3. 表达定量
    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
