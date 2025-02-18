@@ -216,6 +216,12 @@
             - [生信软件|bowtie2（测序序列与参考序列比对）-2023-06](https://blog.csdn.net/u011262253/article/details/79833969)
             - [转录组学助力：索引文件构建(tophat2、star、hisat2简单使用)-2023-11](https://mp.weixin.qq.com/s/9RdWTbu3XS5q1lwk_UitNg)
             - [转录组学初体验 ｜ 2.4 Tophat与Tophat2（参数--threads是不是写错的，还有tophat2比对的命令也有错误，不用.fa）-2024-06](https://mp.weixin.qq.com/s/VbXYw1a4MEzWXMYkcQSRcA)
+            - [转录组学初体验 ｜ 2.5 软件介绍STAR](https://mp.weixin.qq.com/s/UVnNA-Mk-x7tGrUR3UlzrQ)
+            - [STAR比对工具原理及使用介绍(含结果解读)-2022-11](https://mp.weixin.qq.com/s/lBIcIWMU7_5b_sj2I9WUFQ)
+            - [RNA-Seq比对工具 | STAR-2024-10](https://mp.weixin.qq.com/s/VsjcQ2Vrb-k9wfaarBfQgg)
+            - [RNA-seq上游分析 ① | STAR流程测试-2024-06](https://mp.weixin.qq.com/s/qvhSc-OKYhK-gcA5uNlk5g)
+            - [RNA-seq数据分析—STAR比对-2023-03](https://mp.weixin.qq.com/s/jyMCPOg364EP3ayze24q6g)
+            - [RNA-seq分析——数据比对](https://mp.weixin.qq.com/s/p1pwdliUUpj9dNa5h26B2A)
         - 使用tophat2软件进行比对(目前不太用，速度慢，到2016年已停止更新)
             1. 在基因组网站上下载基因组文件和对应的注释文件
                 - yotube视频直接在ensembl上下载的是genome.fa而不是toplevel，而且这个细菌基因组很小，建立索引时直接一个文件名和前缀就完了；
@@ -232,7 +238,7 @@
                         - --large-index:使用较大的索引。一般情况下基因组大于4G的时候，考虑使用大索引。
                         - reference_genome:输入的基因组文件路径；
                         - genome_index_prefix：输出的索引文件的前缀，比如`xx/xx`；结束后得到6个索引文件例如BanmaoChr.1.bt2l、BanmaoChr.2.bt2l、BanmaoChr.3.bt2l、BanmaoChr.4.bt2l、BanmaoChr.rev.1.bt2l、BanmaoChr.rev.2.bt2l、BanmaoChr.fa；
-                        - **注意**：索引文件和基因组文件前缀需要一致；而且最好将fasta的基因组文件和生成的索引文件放在一个目录下，不然tophat2运行过程还会自动生成，也就是可能有一个tophat_out文件夹产生，里面包含fasta的基因组文件。
+                        - **注意**：索引文件和基因组文件前缀需要一致；而且最好将fasta的基因组文件和生成的索引文件放在一个目录下，不然tophat2运行过程还会自动生成，也就是可能有一个tophat_out文件夹产生，里面包含fasta的基因组文件（好像就算放在一起也会产生这个文件）。
             3. 使用tophat2进行比对
                 - 简介与安装（源码安装）
                     - TopHat2的安装是依赖Bowtie2的（当然Bowtie1也是可行的）；TopHat2容错率很低，并不会因为没有比对上就而截短Read从而去比对上，所以低质量的碱基比对的效果可能不是那么好。此外，TopHat2可以察觉基因组的易位，将Read比对到潜在的融合转录子上。
@@ -248,7 +254,7 @@
                         - -p：线程数；
                         - -G：后面接相应参考基因组的注释文件的路径（gtf或gff），如果注释文件存在的话，在运行时会首先被tophat2调用bowtie2建立转录组的index（这个过程会占用一定的时间，建议事先准备好转录组索引以节约后续比对的时间），读长将会优先根据转录组索引进行比对；
                             - 生成的结果文件：GRCh37.74.tr.1.bt2、GRCh37.74.tr.2.bt2、GRCh37.74.tr.3.bt2、GRCh37.74.tr.4.bt2、GRCh37.74.tr.fa、GRCh37.74.tr.fa.tlst、GRCh37.74.tr.gff、GRCh37.74.tr.rev.1.bt2、GRCh37.74.tr.rev.2.bt2、GRCh37.74.tr.ver。
-                        - -o：文件输出目录的路径，输出的文件包含；
+                        - -o：文件输出目录的路径；
                         - {genome_index_prefix}:基因组索引文件的目录路径+前缀，如`xx/xx/xxx`，此处还是要注意索引文件和基因组文件前缀需要一致；
                         - -r:成对的reads之间的平均inner距离，默认为50。
                         - --library-type  Tophat2处理的reads具有链特异性。一般Illumina数据的默认library-type为fr-unstranded。
@@ -263,7 +269,7 @@
                             - -o：文件输出目录的路径；
                             - .gz结尾压缩的Read是可以直接使用的，但是.tgz 或者 .tar.gz结尾的压缩文件是需要被解压后才能使用。
                     - tophat2生成的结果文件：
-                        - accepted_hits.bam：以BAM文件的形式储存着比对信息，这些比对信息是依据染色体的顺序排列储存的；可用samtools查看，如果第一行中出现`SO:coordinate`——指bam文件已经按照基因组坐标排序过了；是后面cufflinks的输入文件。
+                        - accepted_hits.bam：以BAM文件的形式储存着比对信息，这些比对信息是依据染色体的顺序排列储存的；可用samtools查看，如果第一行中出现`SO:coordinate`——指bam文件**已经按照基因组坐标排序过了**；是后面cufflinks的输入文件。
                         - junctions.bed：是以Bed格式储存着发现的剪接位点，每个位点都含有左右两个部分，每个部分长度是Read能够跨越剪接位点匹配到基因组的最远距离，最终的得分是跨越剪接位点的Read数量。
                         - insertions.bed：包含着查询到的插入位点信息，chromLeft指的是插入到基因组的位置。
                         - deletions.bed：包含着查询到的缺失位点信息，chromLeft指的是缺失片段的第一个碱基。
@@ -276,25 +282,74 @@
             - 简单用法（超长的说明文档）
                 1. 下载物种的参考基因组文件和注释文件
                 2. 使用star软件建立index
-                    - 主要命令：`STAR --runMode genomeGenerate [options] --genomeDir /path/to/genomeDir`
-                        - --runMode genomeGenerate：运行模式，genomeGenerate模式用于构建基因组索引；
+                    - 主要命令：`STAR --runMode genomeGenerate [options] --genomeDir {index_folder}`
+                        - --runMode genomeGenerate：运行模式，genomeGenerate模式用于构建基因组索引；不选的话默认是mapping；
                         - --runThreadN {int}：使用的线程数（处理器数） 
-                        - --genomeDir path_star_index：存储基因组索引的目录路径
-                        - --genomeFastaFiles Athaliana_TAIR10.fasta：FASTA格式的参考基因组文件路径；
-                        - --sjdbGTFfile Athaliana_gene.gtf：用于基因注释的GTF文件（可选）
+                        - --genomeDir {index_folder}：存储基因组索引的目录路径（提前建立），这里不需要前缀；
+                        - --genomeFastaFiles {reference_genome}：FASTA格式的参考基因组文件路径；
+                        - --sjdbGTFfile {species.gff3|species.gtf}：用于基因注释的GTF文件（可选）
                         - --sjdbOverhang 149：剪接位点周围的读取长度.对于sjdbOverhang参数，一般为读取长度-1（或最大读取长度-1）。例如，如果您的读取长度为150，该值应为149。在大多数情况下，默认值100也有效。
                 3. 使用star比对
-                    - 主要命令：`STAR --runMode alignReads [options]... --genomeDir /path/to/genome/index/ --readFilesIn R1.fq R2.fq`
+                    - 主要命令：`STAR --runMode alignReads [options]... --genomeDir {index_folder} --readFilesIn R1.fq R2.fq`
                         - --runThreadN {int}:线程数
-                        - --genomeDir:建立好的index文件存放路径
-                        - --readFilesIn:input fastq文件
-                        - --readFilesCommand zcat:当input fastq文件是压缩格式时，这里必须指定
-                        - --sjdbGTFfile:基因组注释gtf文件路径，当提供该参数后，可以直接对mapping后的结果进行注释计数
-                        - --outSAMtype BAM SortedByCoordinate:输出排序后的bam文件
-                        - --outFileNamePrefix Output_prefix:输出文件的前缀名
-                        - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile 
+                        - --genomeDir {index_folder}:建立好的index文件存放路径；
+                        - --readFilesIn:输入的待比对的input fastq文件；
+                        - --readFilesCommand zcat:当input fastq文件是压缩格式时，这里必须指定该参数，也可以用`--readFilesCommand gunzip -c`代替；
+                        - --sjdbGTFfile {species.gff3|species.gtf}:基因组注释gtf文件路径，当提供该参数后，可以直接对mapping后的结果进行注释计数
+                        - --outSAMtype BAM SortedByCoordinate:输出排序后的bam文件；
+                        - --outFileNamePrefix Output_prefix:输出文件的前缀名；
+                            - 结果文件如下：1. Log.out: 记录详细的比对运行日志，包括参数设置、运行步骤、警告和错误信息。2. Log.progress.out: 展示每个阶段的reads数目和进度。3. SJ.out.tab: 列出所有检测到的剪接事件。4. Log.final.out: 提供最终的统计信息摘要。5. Aligned.sortedByCoord.out.bam：通过BAM压缩格式存储排序后的比对信息。BAM文件可以导入IGV等工具进行可视化。 
+                        - --outSAMstrandField intronMotif：3'端和5'端偏好性，这样写就行
+                        - --outSAMattributes All：要选ALL，不然下游软件会报错;
+                        - --outFilterIntronMotifs RemoveNoncanonical：删除非典型，仅保留典型
+                        - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile;
         - <a href="https://imgse.com/i/pEnG9KS"><img src="https://s21.ax1x.com/2025/02/10/pEnG9KS.png" alt="pEnG9KS.png" border="0"></a>
 3. 表达定量
+    - 相关知识
+        - FPKM、RPKM、TPM
+    - 教程
+        - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
+    - 使用cufflinks软件进行表达量计算（老，不常用了，效率不高）
+        - 简介与安装
+            - 在使用tophat进行比对之后，你需要了解转录本的丰度，它首先将比对后的序列组装成转录本然后对转录本进行定量。
+                - Assembly（将短的reads组装成长的转录本）：比对结果包含所有序列在参考基因组的位置和match信息，转录本组装的第一步就是识别标记相互不兼容的片段，这些片段不能共存于同一个转录本中；第二步就是通过overlap来多个片段连接起来；第三步就是将前两个过程得到的片段信息整合，最终构建出每个转录本的不同异构体（isoforms）；
+                    - <a href="https://imgse.com/i/pEMr2DJ"><img src="https://s21.ax1x.com/2025/02/18/pEMr2DJ.png" alt="pEMr2DJ.png" border="0"></a>  
+                - Abundance estimation：接下来根据片段长度分布 和最大似然法（Maximum Likelihood）将所有reads分配到正确的转录本异构体上；然后计算FPKM；
+                    - <a href="https://imgse.com/i/pEMrRb9"><img src="https://s21.ax1x.com/2025/02/18/pEMrRb9.png" alt="pEMrRb9.png" border="0"></a>
+            - cufflinks软件包括cufflinks（组装转录本、定量）, cuffmerge, cuffcompare, cuffquant, cuffnorm和cuffdiff（表达水平）等几项主要的功能；主要是根据Tophat2产生的比对结果，依托或不依托于参考基因组的GTF注释文件，计算出(各个gene的)isoform的FPKM值，并给出trascripts.gtf 注释结果(组装出转录组)。
+                - cufflinks部分对RNA-seq数据进行转录本组装和表达定量；
+                - cufflmerge部分将多个样本得到的转录本整合成一套完整的转录本集合，可以去除冗余；
+                - cuffcompare部分可以对两个或多个样本的GTF文件进行比较，也可以用自己整合后的完整转录本与已知的基因注释进行比较来寻找新的转录本；
+                - cuffquant部分：可以对单个BAM文件的基因转录本表达水平进行定量分析；
+                - cuffnorm部分：用cuffquant的输出文件（.cxb）或者cu fflinks的输出文件（.bam）作为输入文件，对所有样本表达水平进行统一的标准化去除数据来源的偏倚，并把标准化后的表达值整合在一个文件中。
+            - 安装一致报错，而且要sudo权限貌似，暂时就先用/gss1/env下的学校制作的环境（source一下对应的.env文件即可，退出到其他目录也行）；
+        - 简单用法
+            - cufflinks主要命令：`cufflinks [options] <aligned_reads.(sam/bam)>`
+                - `<aligned_reads.(sam/bam)>`：cufflinks需要SAM或BAM格式的文本文件作为输入文件，并且必须经过排序（比如tophat2产生的已经经过排序的bam文件），针对未排序的sam或bam文件可以使用`sort -k 3,3 -k 4,4n hits.sam > hits.sam.sorted`进行排序。
+                - -p:线程数；
+                - -G|--GTF:基因组注释文件；提供一个GFF文件，以此来计算isoform的表达。此时，将不会组装新的transcripts，程序会忽略和reference transcript不兼容的比对结果;
+                - -g|--GTF-guide：提供GFF文件，以此来指导转录子组装(RABT assembly)。此时，输出结果会包含reference transcripts和novel genes and isforms，也就是相对-G参数只输出注释到的转录本的表达值；
+                - --library-type：默认值fr-unstranded，这是Illumina TruSeq的文库类型。
+                - -o {outout_folder}：输出文件的目录；
+                - -u：让cufflinks来做initial estimation步骤，从而更精确衡量比对到genome多个位点的reads；
+                - -L|--label：默认值是"CUFF"，Cufflink以GTF格式来报告转录子片段(transfrags),该参数是GTF文件的前缀
+                - -M|--mask-file：提供一个GFF或GTF文件。Cufflinks将忽略比对到该GTF文件的transcripts中的reads。该文件中常常是rRNA的注释，也可以包含线立体和其它希望忽略的transcripts的注释。将这些不需要的RNA去除后，对计算mRNA的表达量是有利的。
+            - cufflinks输出的结果：
+                - transcripts.gtf：包含Cufflinks的组装结果，前7列为标准的GTF格式，最后一列为attributes；
+                - ispforms.fpkm_tracking：isoforms(可以理解为gene的各个外显子)的fpkm计算结果；
+                - genes.fpkm_tracking：gene的fpkm计算结果；
+            - cuffmerge主要命令：`cuffmerge -o ./merged_asm -p 8 assembly_list.txt`
+                - 可以将各个Cufflinks生成的transcripts.gtf文件融合称为一个更加全面的transcripts注释结果文件merged.gtf。以利于用Cuffdiff来分析基因差异表达。 
+                - -o：文件输出目录；
+                - assembly_list.txt：需要先将所有需要整合的GTF文件所在的路径保存在assemblies.txt文件中。另外使用-g参数还可以在整合时加入额外的参考注释GTF文件，将已知的转录本和新的转录本融合在一起。
+            - cuffcompare主要命令：`cuffcompare -o cuffcmp cuff1.gtf cuff2.gtf ...`
+                - -o：输出文件的前缀；
+            - cuffdiff主要命令：`cuffdiff --lables lable1,lable2 -p 8 --time-series --multi-read-correct --library-type fr-unstranded --poisson-dispersion transcripts.gtf sample1.sam sample2.sam`
+                - -L|--lables   default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable；
+                - -T|--time-series：让Cuffdiff来按样品顺序来比对样品，而不是对所有的samples都进行两两比对。即第二个SAM和第一个SAM比；第三个SAM和第二个SAM比；第四个SAM和第三个SAM比...
+            - cuffquant主要命令：`cuffquant -o ./ -p 6 -b Ref_Genome/$idx_prefix.fa -u  --max-bundle-frags  50000000  --library-type fr-unstranded Cuffmerge/merged.gtf Tophat/$sample/accepted_hits.bam &` 
+                - cuffquant是cuffquant能够对单个 BAM 文件的基因转录本表达水平进行定量分析。生成的是CXB文件abundances.cxb,，可以作为cuffdiff的输入，这会加快cuffdiff的运行速度。也可以作为Cuffnorm的输入。
+            - cuffnorm主要命令：`cuffnorm --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm -q -p 6 -L` 
    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
    1. 基因表达定量
    2. 表达矩阵的标准化/normalization

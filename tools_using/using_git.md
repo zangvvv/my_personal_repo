@@ -26,17 +26,17 @@
    - 安装好之后右击桌面菜单（在任意目录中右击都有）里会多了两个Git的选项；选择Git Bash进入Git控制台；
 2. 使用Git
    - 修改Git界面样式:
-     进入Git控制台后单击上面的四色Git图标，选择options，选择Text——select，修改样式后保持；
+     进入Git控制台后单击上面的四色Git图标，选择options，选择Text——select（目前是Consola+bold+12pt），修改样式后保持；
    - 要配置Git用户名和邮箱（我就用github注册用的qq邮箱和zangvvv）
       - `git config --global user.name “xx”（用户名）`
       - `git config --global user.email “xx@xx.com”`，这里的邮箱可以随便写；
       - `git config --global --list` 查看当前账户下这两个参数所对应的具体内容；
    - Git中的代码管理常用命令
       - git clone命令用于从支持Git的代码托管网站(如github)上下载源码
-         - 具体过程如下：选择某一个本地文件夹下右击进入Git bash控制台，然后从github的Code获取到该项目的https链接（或ssh）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；
+         - 具体过程如下：选择某一个本地文件夹下右击进入Git bash控制台，然后从github的Code获取到该项目的https链接（ssh也可以）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；
          - 其中的.git文件夹包含版本管理的相关文件。
       - git init命令可以将自己本地的项目用Git进行版本管理
-         - 做法如下：在你项目所在的本地文件夹下右击进入Git bash控制台，输入git init进行初始化，此时会产生一个.git的文件夹（可能被隐藏了而不显示），用于管理即将新建的源代码；
+         - 做法如下：在你项目所在的本地文件夹下右击进入Git bash控制台，输入`git init`进行初始化，此时会产生一个.git的文件夹（可能被隐藏了而不显示），用于管理即将新建的源代码；
       - git commit命令将项目下指定文件或所有文件的代码复制到Git仓库进行备份
          - 使用`git add .`命令（或`git add --all`）将当前文件夹下所有文件放入暂存区；再使用`git commit -m "xxx"`将源代码保存到仓库中；可以使用`git log`查看提交的历史记录
             - 其中"xxx"表示对本次提交的备注，比如：功能一已完成；
