@@ -30,6 +30,7 @@
 3. 下载centos7
 	- 参考资料
        - [参考视频](https://www.bilibili.com/video/BV1RL411x7Z1/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+       - [超详细的WSL教程：Windows上的Linux子系统](https://www.bilibili.com/video/BV1tW42197za/?spm_id_from=333.999.0.0&vd_source=2523c7055f0985a7f47ca59739b6b086)
        - [参考博客](https://www.cnblogs.com/zy115/p/18638254)
        - [参考推文1](https://mp.weixin.qq.com/s/PlcxEL5KXDX9e-lpWGzHcQ)
        - [参考推文2](https://mp.weixin.qq.com/s/sM3T9xt5MZG2ZzNvOl9_RA)

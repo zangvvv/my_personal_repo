@@ -27,15 +27,21 @@
 2. 教程
    - [b站Dlab视频教程——很多软件使用和详细代码](https://www.bilibili.com/video/BV1Jt4y157qA?spm_id_from=333.788.videopod.episodes&vd_source=2523c7055f0985a7f47ca59739b6b086&p=3)
    - [b站数据科学那些事——很多原理与实验设计的知识——2021年](https://www.bilibili.com/video/BV1t34y1U7zW/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+   - [RNA-seq转录组数据分析入门实战](https://www.bilibili.com/video/BV1KJ411p7WN?spm_id_from=333.788.player.switch&vd_source=2523c7055f0985a7f47ca59739b6b086&p=6)
 ### 3.2 具体分析流程
-1. 原始数据下载（如果不是直接得到的话）
+1. 原始数据上传
+    - 有时是自己的数据，就需要本地上传到服务器，这时候需要注意传输过程中的数据完整性； 
+    - 使用md5值进行检验数据完整性：
+        - 给自己的文件生成md5值：`md5sum *gz > md5.txt`(一个文件一个值)
+        - 比对已有的md5值（就是传输之前要生成一次md5值，用来在传输之后进行比对）：`md5sum -c md5.txt`
+2. 原始数据下载（如果不是直接得到的话）
     1. 相关知识
         1. [GEO和SRA数据库](https://phantom-aria.github.io/2022/05/04/a.html)
-           - GEO数据库是基因表达数据库，一般提供的都是中间文件，比如转录组数据的表达矩阵，芯片数据的中间注释文件，单细胞测序的细胞注释，突变的vcf突变文件等等。部分文章只提供SRA。 
+           - GEO数据库是基因表达数据库，一般提供的都是中间文件，比如转录组数据的表达矩阵，芯片数据的中间注释文件，单细胞测序的细胞注释，突变的vcf突变文件等等。部分文章只提供SRA。（点击`SRA run selector`进入样本下载界面） 
            - SRA数据库，存储原始测序数据的数据库
         2. GEO数据库的GPL（platform）、GSM（Sample）、GSE（Series）
            - 文章提供的是NCBI的GSE number：比如练习数据GSE142570；点击链接进入后可以看到以GPL、GSE、GSM开头的编号；其中GPL表示测序用的平台、GSE代表一系列相关样本组成的数据集、GSM代表单个样本的数据记录，还包含该样本的的详细元数据（如实验条件、处理方式、生物学重复等），一个GSM可以是单独的样本，也可以是多样本的实验组。也就是说GSE和GSM是一对多的关系，每个GSE包含多个GSM。
-           - 练习数据有513个Sample（但是文中说的是510个数据），也就是对应了513个GSM编号；共有ChIP-seq（355 samples）、RNA-seq（58）、FAIRE-seq（58）、BiSulfite-seq（38）、ChIP-reChIP-seq（4）5个数据集，即对应5个GSE编号，共513个样本。
+           - 比如练习数据有513个Sample（但是文中说的是510个数据），也就是对应了513个GSM编号；共有ChIP-seq（355 samples）、RNA-seq（58）、FAIRE-seq（58）、BiSulfite-seq（38）、ChIP-reChIP-seq（4）5个数据集，即对应5个GSE编号，共513个样本。
         3. SRA数据库的SRP（Project）、SRS(样本 Sample)、SRX(数据产生 Experiment)、SRR（Read Run）
            - SRR是一次测序的数据，与GSM的关系不大。一个GSM可能对应多个SRR（一个样本测多次），一个SRR也可能对应多个GSM的数据（一次测多个样本）。
            - SRP代表一个实验项目，包含多个SRR。
@@ -81,32 +87,31 @@
             - [SRA到fastq格式的批量转换2种工具-2021](https://blog.csdn.net/qq_42458954/article/details/120018000)
             - [10x单细胞转录组测序sra转fastq踩坑](https://github.com/ixxmu/mp_duty/issues/1407)
         - 使用fastq-dump（NCBI官方的sratools的命令，老旧但也能用） 
-            - 主要命令：fastq-dump --split-3 SRRxxxx -O fastq
+            - 主要命令：`fastq-dump --split-3 SRRxxxx -O fastq`
                 - --split-3：还有两个同样作用的参数--split-spot、--split-files，这两个好像都是针对paired的reads（files好像出现的较多），而--split-3既可以针对single end也可以针对paired end的数据。
                 - -O ${directory}：输出文件所在路径
                 - --fasta：可以直接转成fasta文件
                 - --gzip：可以将输出的fastq文件压缩成gzip格式以节省空间
                 - 对SRRxxxx还是SRRxxxx.sra效果是一样的
         - 使用fasterq-dump（也是NCBI的sratools，较新）
-            -  主要命令：fasterq-dump -p -e 24 --split-files -O ${outdirectory} SRR1234567.sra
+            -  主要命令：`fasterq-dump -p -e 24 --split-files -O ${outdirectory} SRR1234567.sra`
                 - -p显示进程；-e支持线程数的控制；不想显示进程可以用-q参数；
                 - 不支持压缩命令
                 - 这个好像需要更大的空余内存，同样的命令有小报错'Disk quota exceeded'，快好像没有体会到。
                 - 对SRRxxxx还是SRRxxxx.sra效果也是一样的
                 - 同样支持--fasta参数直接转成fasta文件
-2. 原始数据质控和比对
+3. 原始数据质控和比对
     1. 相关知识 
     2. 质量评估（也是质控的一环）
         - 教程
             - [序列数据上游分析——RNA-seq(fastqc+multiqc+trim_galore+hisat2+featureCounts-2022-12](https://mp.weixin.qq.com/s/qx5tDkm2ouOSz1D5_3AHGQ) 
             - [【转录组上游】全流程示例(fastQC+trim_galore+star+)](https://mp.weixin.qq.com/s/kv9Ku0M8nd8o8KBulU81RQ)
-            - [fastqc和multiqc及结果解读-2023](https://mp.weixin.qq.com/s/J35UysO6Rwo22K9l6YL-pw)
             - [RNAseq分析之FastQC（有结果解读）-2023-11](https://mp.weixin.qq.com/s/RQSCPyMgbeBweFjX92iCPA)
             - [一文掌握fastqc使用及结果解读-2024](https://mp.weixin.qq.com/s/clC40jVPcYpVAflgFRJCTA)
-            - [软件2 —— fastqc和multiqc]()    
+            - [软件2 —— fastqc和multiqc(及结果解读)-2023](https://mp.weixin.qq.com/s/J35UysO6Rwo22K9l6YL-pw)    
         - 使用FastQC软件进行质量评估
-            - 可以多线程地对各种测序数据进行QC  
-            - 主要命令：fastqc -t 12 -o {out_path} sample1_1.fq sample1_2.fq
+            - 可以多线程地对各种测序数据进行QC，conda一键安装； 
+            - 主要命令：`fastqc -t 12 -o {out_path} sample1_1.fq sample1_2.fq`
                 - -t指定线程数；
                 - -o指定存放结果文件的目录路径；最后输出一个html文件和一个zip文件
             - FastQC结果解读
@@ -138,13 +143,27 @@
                 10. Adapter Content
                     - 该图用于检测测序读取中是否存在接头序列。在测序过程中，接头序列被添加到DNA片段的两端，以便将片段固定到测序平台上。理想情况下，这些接头序列在数据处理之前会被去除，因为它们不是样本的一部分。然而，如果接头剪切不完全，它们可能会在测序数据中出现。横轴：表示读取序列中的位置纵轴：检测到接头序列的百分比。不同颜色代表了不同的接头类型，例如Illumina Universal Adapter、Illumina Small RNA 3' Adapter等。软件内置了四种常用的测序接头序列，同时fastqc也有一个参数-a可以自定义接头序列从上图中可以看出，在所有读取位置上几乎没有检测到接头序列，这意味着数据中的接头含量非常低，或者说几乎没有接头污染。表明接头序列已被有效去除，减少了对后续数据分析造成干扰的可能性。 
         - 使用MultiQC软件汇总成一个报告
-            - 用fastQC进行质量评估后，用MultiQC整合多个样本的分析结果成一个html报告，运行时可以提供一个或多个目录以扫描分析结果。
+            - 简介与安装
+                - 用fastQC进行质量评估后，用MultiQC整合多个样本的分析结果成一个html报告，运行时可以提供一个或多个目录以扫描分析结果。
+                - 安装：不论是使用conda还是pip安装后都无法正常使用，使用`multiqc --version`都会出现如下的报错，使用python3.8还是python3.13都无济于事，重新安装numpy也没用，并且公共软件的multiqc也同样的报错；最后是在自己本地`pip install multiqc`安装并运行成功
+                    - [官网](https://docs.seqera.io/multiqc/getting_started/installation) 
+                    - `ModuleNotFoundError: No module named 'numpy.core._multiarray_umath'`
+                    - `ImportError: Error importing numpy: you should not try to import numpy from its source directory; please exit the numpy source tree, and relaunch your python interpreter from there.` 
+                    - <a href="https://imgse.com/i/pEQcinS"><img src="https://s21.ax1x.com/2025/02/20/pEQcinS.png" alt="pEQcinS.png" border="0"></a>
+            - 主要命令：`multiqc ./*.zip -o ./ > ./multiqc.log &`
+                - ./*.zip：就是fastqc结果路径，注意，multiqc接受的是fastqc结果的zip文件；
+                - -o：就是输出目录，默认有一个multiqc_data文件夹和html文件产生；
+            - multiqc结果解读
+                - [MultiQC对FastQC结果的解读](https://mp.weixin.qq.com/s/ZgX5fpjqRD1UCtBxpf6ytw) 
+                - [MultiQC对FastQC结果的解读](https://www.bilibili.com/video/BV1QG411d7RN/?spm_id_from=333.1391.0.0&vd_source=2523c7055f0985a7f47ca59739b6b086)
+                - 首先包含一个general statistics，是一个整体概览；
+                - <a href="https://imgse.com/i/pEQcF0g"><img src="https://s21.ax1x.com/2025/02/20/pEQcF0g.png" alt="pEQcF0g.png" border="0"></a>
     3. 质控
         - 教程
             - [测序数据质量控制之Trimmomatic-2017-10](https://mp.weixin.qq.com/s/f7MZ0yRD9tMjMQYljO1exQ)
             - [数据预处理：Cutadapt、FastP、Trimmomatic 怎么选？-2025-02(建议使用fastp)](https://mp.weixin.qq.com/s/WAA39p1wCPHRqm-cUonAIA)
-            - [测序数据清洗篇 Ⅰ-2024-05](https://mp.weixin.qq.com/s/O_zClrRZO8I6SHwbpuM1KQ)
-            - [软件3 —— Trim Galore和Trimmomatic](https://mp.weixin.qq.com/s/5pEiqS5l4HQzptmKZOlm0w)
+            - [测序数据清洗篇 Ⅰ（含接头）-2024-05](https://mp.weixin.qq.com/s/O_zClrRZO8I6SHwbpuM1KQ)
+            - [软件3 —— Trim Galore和Trimmomatic（含接头）-2023-06](https://mp.weixin.qq.com/s/5pEiqS5l4HQzptmKZOlm0w)
             - [转录组上游质控trim galore安装与使用-2024-06](https://mp.weixin.qq.com/s/Al_nysdFWblzbfJhl9-EtA)
             - [功能强大的trim galore软件-2024-02](https://mp.weixin.qq.com/s/SlSR7KB_PdaOqC68qMkHxg)
             - [24转录组分析_trim_galore软件的使用方法_2021-06(未看)](https://www.bilibili.com/video/BV1744y1z7fm?spm_id_from=333.788.recommend_more_video.1&vd_source=2523c7055f0985a7f47ca59739b6b086)
@@ -169,7 +188,7 @@
                 - 主要命令（单端）：`fastp -i in.fq -o out.fq`
         - 使用trimmonmatic软件进行质控
             - 简介与安装
-                - Trimmomatic是一个处理高通量测序数据常用的工具，尤其是对于 Illumina 测序数据。它提供了包括去除接头序列（adapter trimming）、质量过滤（quality filtering）、去除低质量序列（trimming low-quality bases）等在内的功能，以帮助提高序列数据的质量和可靠性。
+                - Trimmomatic是一个处理高通量测序数据常用的工具，尤其是对于Illumina测序数据。它提供了包括去除接头序列（adapter trimming）、质量过滤（quality filtering）、去除低质量序列（trimming low-quality bases）等在内的功能，以帮助提高序列数据的质量和可靠性。
                 - FastQC并不包含真正质量控制的过程（不会改变reads本身）；这时候就需要trimmomatic之类的软件了，它支持多线程，可以针对SE和PE（单端和双端）测序数据，也支持gzip和bzip2压缩文件。
                 - 可以conda一键安装；我在rna-seq环境中安装过，但是用`find /gss1/home/huangju02/anaconda3/envs/ -name *rimmomatic*`去查找会发现有一个trimmomatic和一个trimmomatic.jar，运行前者实际调用的是后者；
             - 简单用法
@@ -178,11 +197,11 @@
                     - SE表示使用针对单端测序；-threads指定线程数；
                     - -trimlog参数指定了过滤日志文件名。
                         - 日志中包含以下内容:read ID、过滤之后剩余序列长度、过滤之后的序列起始碱基位置（序列开头处被切掉了多少个碱基）、过滤之后的序列末端碱基位置、序列末端处被剪切掉的碱基数。由于生成的 trimlog 文件中包含了每一条 reads 的处理记录，因此文件体积巨大（GB 级别），如果后面不会用到 trim 日志，建议不要使用这个参数。
-                - 主要命令（PE模式）：`java -jar {path_to trimmomatic} PE [-phred33|-phred64] ${name}_1.fq.gz ${name}_2.fq.gz ${name}_R1.clean.fq.gz ${name}_R1.unpaired.fq.gz ${name}_R2.clean.fq.gz ${name}_R2.unpaired.fq.gz ILLUMINACLIP:"$adapter"/Exome.fa:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:4:15 -threads 2 MINLEN:36`
+                - 主要命令（PE模式）：`java -jar {path_to trimmomatic} PE [-phred33|-phred64] ${name}_1.fq.gz ${name}_2.fq.gz ${name}_R1.clean.fq.gz ${name}_R1.unpaired.fq.gz ${name}_R2.clean.fq.gz ${name}_R2.unpaired.fq.gz ILLUMINACLIP:"$adapter"/Exome.fa:2:30:10:1:true LEADING:20 TRAILING:20 SLIDINGWINDOW:4:15 -threads 2 MINLEN:36`
                     - 在 PE 模式下，有两个输入文件，正向测序序列和反向测序序列，但是过滤之后输出文件有四个，过滤之后双端序列都保留的就是 paired，反之如果其中一端序列过滤之后被丢弃了另一端序列保留下来了就是unpaired。
                         - 一张图片  
                     - `${name}1.fq.gz ${name}2.fq.gz` 为输入文件；`${name}R1.clean.fq.gz ${name}R1.unpaired.fq.gz ${name}R2.clean.fq.gz ${name}R2.unpaired.fq.gz` 为对应的四个输出文件；
-                    - `ILLUMINACLIP:"$adapter"/Exome.fa:2:30:10`，这部分指定2种去接头模式的参数：`"$adapter"/Exome.fa` 指明需要匹配的接头fasta文件；2 代表 16 个碱基长度的种子序列中可以有 2 个错配，30 代表采用回文模式时匹配得分至少为30 (约50个碱基)，10 代表采用简单模式时匹配得分至少为10 (约17个碱基)；可以根据FastQC结果的adapter部分选取，如果结果好的话可以不用本参数。
+                    - `ILLUMINACLIP:"$adapter"/Exome.fa:2:30:10:1:true`，这部分指定2种去接头模式的参数：`"$adapter"/Exome.fa` 指明需要匹配的接头fasta文件；2 代表 16 个碱基长度的种子序列中可以有 2 个错配，30 代表采用回文模式时匹配得分至少为30 (约50个碱基)，10 代表采用简单模式时匹配得分至少为10 (约17个碱基)；可以根据FastQC结果的adapter部分选取，如果结果好的话可以不用本参数。双端的话最好把true用上；
                     - `LEADING: 20`，从序列的开头开始去掉质量值小于 20 的碱基；
                     - `TRAILING:20`，从序列的末尾开始去掉质量值小于 20 的碱基；
                     - `SLIDINGWINDOW:4:15`，从 5' 端开始以 4 bp 的窗口计算碱基平均质量，如果此窗口平均值低于 15，则从这个位置截断read；
@@ -204,7 +223,7 @@
                     - --gzip：将输出结果压缩为gzip格式。
                     - --max_n：一条read在被完全删除之前可能包含的N的总数，别人的示例为4。
                     - -e设置最大错误率：默认为0.1，应该是比较常用的。   
-    4. 比对
+    4. 比对（此处主要指有参比对，而且是基于基因组比对，无参比对可以用Trinity，基于转录本比对可以用RSEM）
         - 相关知识
             - RNA-seq的reads是跨外显子的（剔除内含子），所以不能用DNA测序所用的BWA、bowtie，它们它们假设 reads 来自于连续的 DNA 序列，不会考虑外显子与内含子的边界问题，无法识别剪接事件；
             - 常用的软件有star、hisat2（基于bowtie2）、tophat（基于bowtie，tophat2基于bowtie2）、subread；
@@ -293,22 +312,30 @@
                     - 主要命令：`STAR --runMode alignReads [options]... --genomeDir {index_folder} --readFilesIn R1.fq R2.fq`
                         - --runThreadN {int}:线程数
                         - --genomeDir {index_folder}:建立好的index文件存放路径；
-                        - --readFilesIn:输入的待比对的input fastq文件；
+                        - --readFilesIn:输入的待比对的input fastq文件，也就是过了后的clean_data；
                         - --readFilesCommand zcat:当input fastq文件是压缩格式时，这里必须指定该参数，也可以用`--readFilesCommand gunzip -c`代替；
                         - --sjdbGTFfile {species.gff3|species.gtf}:基因组注释gtf文件路径，当提供该参数后，可以直接对mapping后的结果进行注释计数
                         - --outSAMtype BAM SortedByCoordinate:输出排序后的bam文件；
+                        - --outBAMsortingThreadN {int}：排序使用的线程数；
                         - --outFileNamePrefix Output_prefix:输出文件的前缀名；
                             - 结果文件如下：1. Log.out: 记录详细的比对运行日志，包括参数设置、运行步骤、警告和错误信息。2. Log.progress.out: 展示每个阶段的reads数目和进度。3. SJ.out.tab: 列出所有检测到的剪接事件。4. Log.final.out: 提供最终的统计信息摘要。5. Aligned.sortedByCoord.out.bam：通过BAM压缩格式存储排序后的比对信息。BAM文件可以导入IGV等工具进行可视化。 
-                        - --outSAMstrandField intronMotif：3'端和5'端偏好性，这样写就行
+                        - --outSAMstrandField intronMotif：3'端和5'端偏好性，这样写就行；
                         - --outSAMattributes All：要选ALL，不然下游软件会报错;
                         - --outFilterIntronMotifs RemoveNoncanonical：删除非典型，仅保留典型
-                        - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile;
+                        - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile；如果后面要使用RSEM进行定量分析，可以再加一个TranscriptomeSAM；
         - <a href="https://imgse.com/i/pEnG9KS"><img src="https://s21.ax1x.com/2025/02/10/pEnG9KS.png" alt="pEnG9KS.png" border="0"></a>
-3. 表达定量
+        - 使用Hisat2软件进行比对（效率高内存少，但输出结果仅为比对文件）
+            - 
+4. 表达定量
     - 相关知识
         - FPKM、RPKM、TPM
     - 教程
         - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
+    - 处理原始比对文件
+        - sam格式转bam格式
+        - 对bam文件进行排序
+        - 去除比对得分较低序列
+        - 去除重复reads
     - 使用cufflinks软件进行表达量计算（老，不常用了，效率不高）
         - 简介与安装
             - 在使用tophat进行比对之后，你需要了解转录本的丰度，它首先将比对后的序列组装成转录本然后对转录本进行定量。
@@ -357,10 +384,10 @@
       - <a href="https://imgse.com/i/pEnDw4O"><img src="https://s21.ax1x.com/2025/02/10/pEnDw4O.png" alt="pEnDw4O.png" border="0"></a>
    3. 质控
       - 样本过滤和基因过滤 
-4. PCA和样本相关性分析
+5. PCA和样本相关性分析
    - <a href="https://imgse.com/i/pEnGA5n"><img src="https://s21.ax1x.com/2025/02/10/pEnGA5n.png" alt="pEnGA5n.png" border="0"></a>
    - <a href="https://imgse.com/i/pEnGFEj"><img src="https://s21.ax1x.com/2025/02/10/pEnGFEj.png" alt="pEnGFEj.png" border="0"></a>
-5. 差异表达分析
+6. 差异表达分析
    1. 准备工作
       - 软件：DESeq2
    2. 筛选差异表达基因
@@ -369,7 +396,7 @@
    - <a href="https://imgse.com/i/pEnGkUs"><img src="https://s21.ax1x.com/2025/02/10/pEnGkUs.png" alt="pEnGkUs.png" border="0"></a>
    - <a href="https://imgse.com/i/pEnBQld"><img src="https://s21.ax1x.com/2025/02/10/pEnBQld.png" alt="pEnBQld.png" border="0" /></a>
    - <a href="https://imgse.com/i/pEnGCDg"><img src="https://s21.ax1x.com/2025/02/10/pEnGCDg.png" alt="pEnGCDg.png" border="0"></a>
-6. 富集分析
+7. 富集分析
    1. KEGG富集
    2. GO富集
    3. reactome富集

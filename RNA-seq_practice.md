@@ -7,12 +7,32 @@
 4. 基因表达定量：Cufflinks (2.2.1)
     - 参数设置：Expressed genes were defined as those with FPKM > 1.
 6. 筛选差异基因：R包DESeq2
-    - 参数设置：adjusted p value < 0.05 and log2 fold-change > 1.5.
-## 二、原始数据下载
-1. 实际操作
-    1. 用prefetch下载序列
-    2. 提取成fastq
-## 三、质控
+    - 参数设置：adjusted p value < 0.05 and log2 fold-change > 1.5.；
+7. 练习数据有513个Sample（但是文中说的是510个数据），也就是对应了513个GSM编号；共有ChIP-seq（355 samples）、RNA-seq（58）、FAIRE-seq（58）、BiSulfite-seq（38）、ChIP-reChIP-seq（4）5个数据集，即对应5个GSE编号，共513个样本。
+## 二、准备工作
+1. 构建项目目录以及参考序列下载
+    - 原始数据目录raw_data
+    - 基因组文件（ensembl、JGI等或物种专用网站）和注释信息文件ref
+    - 质控之后的结果clean_data
+    - 结果文件：比对结果和定量结果
+2. 原始数据下载或上传
+    1. 用prefetch下载序列以及提取成fastq文件
+        - 进入GEO后选择RNA-seq数据，点击进入RNA-seq的GSE数据，点击`SRA run selector`进入样本下载界面；
+        - 选择好样本后导出样本，使用`prefetch -f no -p --option-file SRR_mh63_nippobare_rna-seq.txt`进行下载得到sra文件；
+    2. 提取成fastq：
+        - 写在get_fastq_gz.sh里面；并且解压了一条gz文件，发现大小和之前解压成fastq的文件大小一致，说明应该没错；多久给忘了，大概几个小时吧；
+## 三、数据预处理
+1. 质量控制（指导数据问题在哪）
+    - fastqc和MultiQC
+    - 使用`ls fastq_gz/*_1.fastq.gz | sed 's/_1.fastq.gz//' | xargs -I {} echo "nohup fastqc -t 12 -o ../1_fastqc {}_1.fastq.gz {}_2.fastq.gz &" > process_fastqc.sh` 先生成脚本，然后执行；由于并行执行，耗时5分钟。并且查看了结果与之前的单个样本去运行一样，说明执行无误；
+    - 使用multiqc：`python -m multiqc ./fastqc`，其中-m表示用 Python 运行一个模块，而不是一个脚本文件；一分钟不到吧；
+2. 质量过滤
+    - 去接头：multiqc结果中有2个是不过关的，分别是SRR10751908_1和SRR10751908_2，可以过滤的接头是Illumina Universal Adapter；（trimmomatic也可以过滤自己指定的特定接头序列）
+        - <a href="https://imgse.com/i/pEQcCX8"><img src="https://s21.ax1x.com/2025/02/20/pEQcCX8.png" alt="pEQcCX8.png" border="0"></a> 
+    - 使用find ~/anaconda3/ -name *TruSeq3-PE*可以查看到trimmomatic自带的Illumina接头序列
+        - <a href="https://imgse.com/i/pEQcKXT"><img src="https://s21.ax1x.com/2025/02/20/pEQcKXT.png" alt="pEQcKXT.png" border="0"></a> 
+        - <a href="https://imgse.com/i/pEQcucV"><img src="https://s21.ax1x.com/2025/02/20/pEQcucV.png" alt="pEQcucV.png" border="0"></a>
+        - <a href="https://imgse.com/i/pEQcQnU"><img src="https://s21.ax1x.com/2025/02/20/pEQcQnU.png" alt="pEQcQnU.png" border="0"></a>  
 参考张一柯设置的参数，单个序列的代码为：`trimmomatic PE -phred33 SRR10751892_1.fastq SRR10751892_2.fastq ./tmp_trim/SRR_92_r1.clean.fq.gz ./tmp_trim/SRR_92_r1.unpaired.fq.gz ./tmp_trim/SRR_92_r2.clean.fq.gz ./tmp_trim/SRR_92_r2.unpaired.fq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 -threads 12 MINLEN:36`
 ## 四、建立基因组索引
 已经确认下载的基因组文件和gff文件所用的染色体序号一致；然后将基因组的fa文件和所建立的索引放在一个目录下；
