@@ -68,7 +68,7 @@
         - 使用：`git push <远程仓库名> <本地分支名>:<远程分支名>`，如果本地分支名与远程分支名相同，则可以直接写成`git push <远程仓库名> <本地分支名>`
             - 示例：`git push -u origin main -f` 或者`git push origin main`
             - <分支名>：main或master；
-            - -u|--set-upstream：用于设置当前本地分支（如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。`git push -u origin main`表示设置（远程）main 分支的上游分支为 origin/main，相当于已经设置了默认推送分支，之后只需运行`git push`即可将当前本地的文件传到对应分支；
+            - -u|--set-upstream：用于设置当前本地分支（如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。`git push -u origin main`表示设置（远程）main 分支的上游分支为 origin/main，相当于已经设置了默认推送分支，之后只需运行`git push`即可将当前本地的文件传到对应分支（但是总是报错` unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Open SSL SSL_read: SSL_ERROR_SYSCALL, errno 0`，还是用`git push -u origin main -f`吧；
             - -f|--force：强制推送，将本地分支的内容覆盖到远程分支；
     - git pull命令
         - 作用：用于从远程仓库获取最新的代码并与本地代码合并；
@@ -105,20 +105,23 @@
         - 输入`git push -u origin main -f`
             1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0" width="80%" height="80%"/></a>
             2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0" width="80%" height="80%"/></a>
-3. 之后的工作模式
-    - 如果本地项目有修改，只需先ssh到github，然后git add和git commit将文件或项目放进暂存区，然后git push到github就行；（第一次上传就是多了将本地项目存放到Git仓库、与远程github关联、设置默认分支这几个步骤）
-        - `ssh -T git@github.com`
-        - `git add .`
-        - `git commit -m "final_test"`
-        - `git push`
-        - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0" width="60%" height="70%"/></a>
+3. github项目多端同步（注意，这种方式适合个人项目，多人项目需要更深入了解git的机制，特别是[git pull](https://blog.csdn.net/chuyouyinghe/article/details/141386568)）
+    1. 首先将A和B电脑都安装和配置Git，并同时在github登入同一个账户，并分别配置ssh的keys；
+    1. 其次，在A电脑和github上先建立项目，并建立关联，将本地项目推送到github的远程项目；
+    2. 然后在B电脑上从github克隆项目或者自己建立项目后建立关联再pull到最新的代码，反正都要建立与远程仓库的关联；
+    3. 在B电脑上修改代码后推送到github；
+         - 先`ssh -T git@github.com`到github，然后`git add .`（或某个文件）和`git commit -m "final_test"`将文件或项目提交仓库，然后`git push -u origin main -f`到github就行；
+         - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0" width="60%" height="70%"/></a> 
+    4. 在A电脑上只需`git pull origin main`就可以更新到最新的代码；（同理在A上修改后推送到github，在B上也是pull一下更新到最新的代码即可）
 - 报错大赏
     - 报错：`error: src refspec main does not match any`
-        - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。
-    - 报错：`error: remote origin already exists`表示远程仓库已经存在，就是你的本地仓库已经关联到了另一个远程仓库，而不是你现在想要关联的仓库；
+        - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。（建议直接使用`git init -b main`）
+    - 报错：`error: remote origin already exists`表示远程仓库已经存在，就是你的本地仓库已经关联到了另一个远程仓库，而不是你现在想要关联的仓库，此时进行git push可能报错`fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.`；
+        - [![pEls4dH.png](https://s21.ax1x.com/2025/02/23/pEls4dH.png)](https://imgse.com/i/pEls4dH) 
+        - [git问题error: remote origin already exists.](https://blog.csdn.net/weixin_43916997/article/details/123645376) ,具体操作如下
         - 1、先输入git remote rm origin 删除关联的origin的远程库
         - 2、关联自己的仓库 git remote add origin https://gitee.com/xxxxxx.git
         - 3、最后git push origin master，这样就推送到自己的仓库了。
     - 报错：`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Failed to connect to github.com port 443 after 21103 ms: Could not connect to server` 
-        - 不知道啥原因，有时候重新改一下commit的名字就行；
+        - 不知道啥原因，有时候重新改一下commit的名字就行；然后使用`git push -u origin main -f`进行推送而不是`git push`；
  

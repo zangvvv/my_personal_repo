@@ -81,10 +81,31 @@
     - bqueues：查看集群中所有队列的信息，包括队列状态和资源使用情况，直接使用`bqueues {队列名}`
     - lsload：查看整体负载，`lsload {compute_num}`：查看某个节点的负载
     - bhosts：查看所有节点核心数使用情况，各列分别为：
-        -  
-## 批量进行作业处理
+        - HOST_NAME 节点名称
+        - STATUS：ok：表示可以接收新作业，只有这种状态可以接受新作业；closed：表示已被作业占满，不接受新作业；unavail和unreach：系统停机或作业调度系统服务有问题；
+        - JL/U 每个用户在该节点最多能使用的核数，-表示没有限制MAX 最大可以同时运行的核数
+        - NJOBS 当前所有运行和待运行作业所需的核数
+        - RUN 已经开始运行的作业占据的核数
+        - SSUSP 系统所挂起的作业所使用的核数
+        - USUSP 用户自行挂起的作业所使用的核数
+        - RSV 系统为你预约所保留的核数
+## 批量进行作业处理（分别对应在/gss1/home/huangju02/hj/vvv/RNA-seq_practice/0_data下的三个trimmomatic脚本）
 1. 方法一：建立一个shell脚本，脚本内包括shell的for循环将命令写成一个个脚本，然后用for循环去使用bsub命令提交作业；
-2. 直接在shell脚本中执行for循环并使用bsub提交命令；
-3. 写成一个循环的lsf脚本
-三种都是有效的；
-（第一个批量20分钟，第二个50分钟，第三个花费4个半小时，前两个都是多个bsub作业，最后一个只有一个作业）
+    - 示例：
+        - <a href="https://imgse.com/i/pEl7VFP"><img src="https://s21.ax1x.com/2025/02/23/pEl7VFP.png" alt="pEl7VFP.png" border="0"></a>
+    - 耗时：
+        - <a href="https://imgse.com/i/pEl7UlF"><img src="https://s21.ax1x.com/2025/02/23/pEl7UlF.png" alt="pEl7UlF.png" border="0"></a>
+        - <a href="https://imgse.com/i/pEl7GF0"><img src="https://s21.ax1x.com/2025/02/23/pEl7GF0.png" alt="pEl7GF0.png" border="0"></a>
+2. 方法二：直接在shell脚本中执行for循环并使用bsub提交命令；
+    - 示例：
+        - <a href="https://imgse.com/i/pEl7Aot"><img src="https://s21.ax1x.com/2025/02/23/pEl7Aot.png" alt="pEl7Aot.png" border="0"></a>
+    - 耗时：
+        - <a href="https://imgse.com/i/pEl73oq"><img src="https://s21.ax1x.com/2025/02/23/pEl73oq.png" alt="pEl73oq.png" border="0"></a>
+        - <a href="https://imgse.com/i/pEl7JYV"><img src="https://s21.ax1x.com/2025/02/23/pEl7JYV.png" alt="pEl7JYV.png" border="0"></a>
+3. 方法三：写成一个循环的lsf脚本
+    - 示例： 
+        - <a href="https://imgse.com/i/pEl7FeA"><img src="https://s21.ax1x.com/2025/02/23/pEl7FeA.png" alt="pEl7FeA.png" border="0"></a>
+    - 耗时：
+        - <a href="https://imgse.com/i/pEl7YWT"><img src="https://s21.ax1x.com/2025/02/23/pEl7YWT.png" alt="pEl7YWT.png" border="0"></a>
+        - <a href="https://imgse.com/i/pEl7NSU"><img src="https://s21.ax1x.com/2025/02/23/pEl7NSU.png" alt="pEl7NSU.png" border="0"></a>
+三种都是有效的；（第一个批量20分钟，第二个50分钟，第三个花费4个多小时（实际上是早上8点51开始的），前两个都是多个bsub作业，最后一个只有一个作业）
