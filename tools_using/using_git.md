@@ -48,7 +48,7 @@
             - `git branch -M main`：将当前的分支改为main，强制执行，即使已经有main分支；
             - `git branch -m master main`：将当前分支从master重命名为main，前提是当前分支是master；
             - `git branch`：查看分支名称（*所在即为当前分支）；
-            -  `git config --global init.defaultBranch main`：全局修改默认分支；
+            - `git config --global init.defaultBranch main`：全局修改默认分支；
     - git add命令
         - 作用：将当前文件夹的指定文件放入暂存区；
         - 使用：
@@ -66,9 +66,9 @@
     - git push命令
         - 作用：用于将本地仓库中的提交上传到远程仓库。
         - 使用：`git push <远程仓库名> <本地分支名>:<远程分支名>`，如果本地分支名与远程分支名相同，则可以直接写成`git push <远程仓库名> <本地分支名>`
-            - git push origin main# 示例：`git push -u origin main -f`
-            - <分支名>：main和master branch：
-            - -u参数：-u是--set-upstream 的缩写，用于设置当前本地分支（例如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。git push -u origin main表示设置（远程）main 分支的上游分支为 origin/main，相当于已经设置了默认推送分支，之后只需运行 git push 即可将当前本地的文件传到对应分支；
+            - 示例：`git push -u origin main -f` 或者`git push origin main`
+            - <分支名>：main或master；
+            - -u|--set-upstream：用于设置当前本地分支（如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。`git push -u origin main`表示设置（远程）main 分支的上游分支为 origin/main，相当于已经设置了默认推送分支，之后只需运行`git push`即可将当前本地的文件传到对应分支；
             - -f|--force：强制推送，将本地分支的内容覆盖到远程分支；
     - git pull命令
         - 作用：用于从远程仓库获取最新的代码并与本地代码合并；
@@ -94,7 +94,7 @@
 2. 将本地项目上传到github
     1. 首先，构建本地项目的本地Git仓库/将本地项目用Git管理：
         - 从本地项目的目录进入Git bash控制台（也可以cd进入），输入下面的代码，将本地项目建立成Git仓库：
-            - `git init` # 初始化一次就行，后面不用再init啦，，建议直接使用`git init -b main`，初始化的同时将主分支设置为main而不是master；
+            - `git init` # 初始化一次就行，后面不用再init啦，建议直接使用`git init -b main`，初始化的同时将主分支设置为main而不是master；
             - `git add .`
             - `git commit -m "本次提交的描述"`：commit只是将代码提交给仓库，还没有推送到远程；
             - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0" width="70%" height="80%"/></a>
@@ -105,18 +105,20 @@
         - 输入`git push -u origin main -f`
             1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0" width="80%" height="80%"/></a>
             2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0" width="80%" height="80%"/></a>
-3. 之后的
+3. 之后的工作模式
     - 如果本地项目有修改，只需先ssh到github，然后git add和git commit将文件或项目放进暂存区，然后git push到github就行；（第一次上传就是多了将本地项目存放到Git仓库、与远程github关联、设置默认分支这几个步骤）
         - `ssh -T git@github.com`
         - `git add .`
         - `git commit -m "final_test"`
         - `git push`
         - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0" width="60%" height="70%"/></a>
-- 报错
+- 报错大赏
     - 报错：`error: src refspec main does not match any`
         - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。
     - 报错：`error: remote origin already exists`表示远程仓库已经存在，就是你的本地仓库已经关联到了另一个远程仓库，而不是你现在想要关联的仓库；
         - 1、先输入git remote rm origin 删除关联的origin的远程库
         - 2、关联自己的仓库 git remote add origin https://gitee.com/xxxxxx.git
-        - 3、最后git push origin master，这样就推送到自己的仓库了。 
+        - 3、最后git push origin master，这样就推送到自己的仓库了。
+    - 报错：`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Failed to connect to github.com port 443 after 21103 ms: Could not connect to server` 
+        - 不知道啥原因，有时候重新改一下commit的名字就行；
  
