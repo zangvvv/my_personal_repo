@@ -34,18 +34,20 @@
         - [对给git配置邮箱和用户名的理解](https://blog.csdn.net/ITWANGBOIT/article/details/103618427)
             - SSH协议只认机器，HTTPS协议只认账号，简单来说，Git的用户名和邮箱并不会在多台设备进行同步，这个用户名和邮箱只是说远程仓库需要记录这些提交记录是由谁提交的，也就是说用户名和邮箱只会出现在远程仓库的commits里。
 2. Git中的代码管理常用命令
-      - git clone命令用于从支持Git的代码托管网站(如github)上下载源码
-         - 具体过程：选择某一个本地文件夹下右击进入Git bash控制台，然后从github的Code获取到该项目的https链接（ssh也可以，但需要先进行ssh的权限验证）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；
-         - 其中的.git文件夹包含版本管理的相关文件。
-      - git init命令可以将自己本地的项目用Git进行版本管理
-         - 做法如下：在你项目所在的本地文件夹下右击进入Git bash控制台，输入`git init`进行初始化，此时会产生一个.git的文件夹（可能被隐藏了而不显示），用于管理即将新建的源代码；
-      - git commit命令将项目下指定文件或所有文件的代码复制到Git仓库进行备份
-         - 使用`git add .`命令（或`git add --all`）将当前文件夹下所有文件放入暂存区；再使用`git commit -m "xxx"`将源代码保存到仓库中；可以使用`git log`查看提交的历史记录
+    - git clone命令
+        - 该命令用于从支持Git的代码托管网站(如github)上下载项目的源码；
+        - 具体过程：选择某一个本地文件夹下右击进入Git bash控制台，然后从github的Code获取到该项目的https链接（ssh也可以，但需要先进行ssh的权限验证）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；
+        - 其中的.git文件夹包含版本管理的相关文件。
+    - git init命令
+        - 可以将自己本地的项目用Git进行版本管理
+        - 做法如下：在你项目所在的本地文件夹下右击进入Git bash控制台，输入`git init`进行初始化，此时会产生一个.git的文件夹（可能被隐藏了而不显示），用于管理即将新建的源代码；
+    - git commit命令将项目下指定文件或所有文件的代码复制到Git仓库进行备份
+        - 使用`git add .`命令（或`git add --all`）将当前文件夹下所有文件放入暂存区；再使用`git commit -m "xxx"`将源代码保存到仓库中；可以使用`git log`查看提交的历史记录
             - 其中"xxx"表示对本次提交的备注，比如：功能一已完成；
-         - 如果项目某一个功能模块只完成了一半，想要将其它已完成的模块文件和文件夹上传到仓库；你可以使用`git add 文件名1 文件名2 …` 将指定文件和文件夹上传到仓库；然后使用`git commit -m "xxx"`添加本次描述；
+        - 如果项目某一个功能模块只完成了一半，想要将其它已完成的模块文件和文件夹上传到仓库；你可以使用`git add 文件名1 文件名2 …` 将指定文件和文件夹上传到仓库；然后使用`git commit -m "xxx"`添加本次描述；
             - `git config/*` # 某个文件夹下所有文件
             - `git home/*.php` # 指定后缀的所有文件
-         - `git checkout`命令将某个文件恢复到最近一次提交的版本
+        - `git checkout`命令将某个文件恢复到最近一次提交的版本
             使用`git checkout HEAD xx文件` 命令会将目录下的xx文件覆盖成上一次提交时的版本。
 ## 四、[二者实际应用——手把手教你用git上传项目到GitHub](https://zhuanlan.zhihu.com/p/193140870)
 1. [将git的ssh key配置到github](https://blog.csdn.net/lqlqlq007/article/details/78983879)
