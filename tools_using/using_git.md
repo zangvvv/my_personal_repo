@@ -35,20 +35,47 @@
             - SSH协议只认机器，HTTPS协议只认账号，简单来说，Git的用户名和邮箱并不会在多台设备进行同步，这个用户名和邮箱只是说远程仓库需要记录这些提交记录是由谁提交的，也就是说用户名和邮箱只会出现在远程仓库的commits里。
 2. Git中的代码管理常用命令
     - git clone命令
-        - 该命令用于从支持Git的代码托管网站(如github)上下载项目的源码；
-        - 具体过程：选择某一个本地文件夹下右击进入Git bash控制台，然后从github的Code获取到该项目的https链接（ssh也可以，但需要先进行ssh的权限验证）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；
-        - 其中的.git文件夹包含版本管理的相关文件。
+        - 作用：该命令用于从支持Git的代码托管网站(如github)上下载项目的源码；
+        - 使用：进入Git bash控制台，然后从github获取到该项目的https链接（ssh也可以，但电脑需要先进行ssh的权限验证）；使用`git clone https://xxxxx`将项目克隆到当前文件夹；文件夹中的.git文件夹包含版本管理的相关文件。
     - git init命令
-        - 可以将自己本地的项目用Git进行版本管理
+        - 作用：可以将自己本地的项目用Git进行版本管理；
         - 做法如下：在你项目所在的本地文件夹下右击进入Git bash控制台，输入`git init`进行初始化，此时会产生一个.git的文件夹（可能被隐藏了而不显示），用于管理即将新建的源代码；
-    - git commit命令将项目下指定文件或所有文件的代码复制到Git仓库进行备份
-        - 使用`git add .`命令（或`git add --all`）将当前文件夹下所有文件放入暂存区；再使用`git commit -m "xxx"`将源代码保存到仓库中；可以使用`git log`查看提交的历史记录
+    - git branch命令
+        - branch是什么？
+            - branch是Git中指向提交记录的可移动指针，用于在同一个仓库中管理多个开发路线；在团队协作中，每个开发者通常会在自己的分支上工作，完成后通过 Pull Request 提交更改。
+            - Git2.28版本之前，默认主分支为master，2.28版本以后，允许用户选择main或master作为主分支，但通常默认还是master；github在2020年10月以后，默认项目的开发的主干分支由master改为main，所以需要在初始化仓库时使用 main 作为默认分支：`git init -b main`；
+        - 使用：
+            - `git branch -M main`：将当前的分支改为main，强制执行，即使已经有main分支；
+            - `git branch -m master main`：将当前分支从master重命名为main，前提是当前分支是master；
+            - `git branch`：查看分支名称（*所在即为当前分支）；
+            -  `git config --global init.defaultBranch main`：全局修改默认分支；
+    - git add命令
+        - 作用：将当前文件夹的指定文件放入暂存区；
+        - 使用：
+            - `git add .`命令（或`git add --all`）:将当前文件夹下所有文件放入暂存区；
+            - `git add 文件名1 文件名2 …` :将指定文件和文件夹上传到仓库；比如项目某一个功能模块只完成了一半，想要将其它已完成的模块文件和文件夹上传到仓库，但注意写好备注；
+            - `git add config/*`: 某个文件夹下所有文件
+            - `git add home/*.php`：指定后缀的所有文件
+    - git commit命令
+        - 作用：将项目下指定文件或所有文件的代码复制到Git仓库进行备份
+        - 使用：将文件放入暂存区后，使用`git commit -m "xxx"`将源代码保存到仓库中；可以使用`git log`查看提交的历史记录
             - 其中"xxx"表示对本次提交的备注，比如：功能一已完成；
-        - 如果项目某一个功能模块只完成了一半，想要将其它已完成的模块文件和文件夹上传到仓库；你可以使用`git add 文件名1 文件名2 …` 将指定文件和文件夹上传到仓库；然后使用`git commit -m "xxx"`添加本次描述；
-            - `git config/*` # 某个文件夹下所有文件
-            - `git home/*.php` # 指定后缀的所有文件
-        - `git checkout`命令将某个文件恢复到最近一次提交的版本
-            使用`git checkout HEAD xx文件` 命令会将目录下的xx文件覆盖成上一次提交时的版本。
+    - `git checkout`命令
+        - 作用：将某个文件恢复到最近一次提交的版本
+        - 使用`git checkout HEAD xx文件` 命令会将目录下的xx文件覆盖成上一次提交时的版本。
+    - git push命令
+        - 作用：用于将本地仓库中的提交上传到远程仓库。
+        - 使用：`git push <远程仓库名> <本地分支名>:<远程分支名>`，如果本地分支名与远程分支名相同，则可以直接写成`git push <远程仓库名> <本地分支名>`
+            - git push origin main# 示例：`git push -u origin main -f`
+            - <分支名>：main和master branch：
+            - -u参数（可略过）
+                - -u是--set-upstream 的缩写，用于设置当前本地分支（例如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。git push -u origin main表示设置（远程）main 分支的上游分支为 origin/main。
+                - 如果之前运行过 git push -u origin main 或者是 git push -u origin <分支名>，你已经设置了默认推送分支，之后只需运行 git push 即可将当前本地的文件传到对应分支；
+            - -f|--force：强制推送
+    - git pull命令
+        - 作用：用于从远程仓库获取最新的代码并与本地代码合并；
+           git pull <远程仓库名> <分支名>
+           git pull origin main # 示例 
 ## 四、[二者实际应用——手把手教你用git上传项目到GitHub](https://zhuanlan.zhihu.com/p/193140870)
 1. [将git的ssh key配置到github](https://blog.csdn.net/lqlqlq007/article/details/78983879)
     1. 在Git生成ssh key（这个ssh key也可以用于gitee等其他支持Git的平台）
@@ -68,36 +95,22 @@
             - [坑：ssh: connect to host github.com port 22: Connection refused](https://zhuanlan.zhihu.com/p/521340971)
         - <a href="https://imgse.com/i/pEmkOIJ"><img src="https://s21.ax1x.com/2025/02/07/pEmkOIJ.png" alt="pEmkOIJ.png" border="0" width="80%" height="80%"/></a>
 2. 将本地项目上传到github
-   - 首先在github上新建一个远程仓库，复制到其仓库链接（比如我的临时仓库 https://github.com/zangvvv/test_repo.git）
-   - 构建本地项目的本地Git仓库/将本地项目用Git管理：
-      - 在本地项目的目录右击进入Git bash控制台（也可以cd进入），输入下面的代码，将本地项目建立成Git仓库：
-         - `git init` # 初始化一次就行，后面不用再init啦
-         - `git add .`，建议直接使用`git init -b main`
-         - `git commit -m "本次提交的描述"`
-         - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0" width="70%" height="80%"/></a>
-   - 将本地Git仓库与github远程仓库关联：(如果不关联就是单独的操作仓库。如果直接clone了项目在本地好像就不用这一步)
-      - 输入`git remote add origin https://github.com/zangvvv/my_personal_repo.git`
-   - 上传本地项目到github：
-      - 输入`git push -u origin main -f`
-         1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0" width="80%" height="80%"/></a>
-         2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0" width="80%" height="80%"/></a>
+    1. 首先，构建本地项目的本地Git仓库/将本地项目用Git管理：
+        - 从本地项目的目录进入Git bash控制台（也可以cd进入），输入下面的代码，将本地项目建立成Git仓库：
+            - `git init` # 初始化一次就行，后面不用再init啦，，建议直接使用`git init -b main`，初始化的同时将主分支设置为main而不是master；
+            - `git add .`
+            - `git commit -m "本次提交的描述"`：commit只是将代码提交给仓库，还没有推送到远程；
+            - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0" width="70%" height="80%"/></a>
+    2. 其次，在github上新建一个远程仓库，复制到其仓库链接（比如我的临时仓库 https://github.com/zangvvv/test_repo.git） 
+    3. 然后将本地Git仓库与github远程仓库关联：(如果不关联就是单独的操作仓库。如果直接clone了项目在本地好像就不用这一步)
+        - 输入`git remote add origin https://github.com/zangvvv/my_personal_repo.git`
+    4. 最后，将本地项目上传本地项目到github：
+        - 输入`git push -u origin main -f`
+            1) <a href="https://imgse.com/i/pEmkvGR"><img src="https://s21.ax1x.com/2025/02/07/pEmkvGR.png" alt="pEmkvGR.png" border="0" width="80%" height="80%"/></a>
+            2) <a href="https://imgse.com/i/pEmkxR1"><img src="https://s21.ax1x.com/2025/02/07/pEmkxR1.png" alt="pEmkxR1.png" border="0" width="80%" height="80%"/></a>
       - 其它相关
-         - 报错：error: src refspec main does not match any
+         - 报错：`error: src refspec main does not match any`
            - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。
-         - 关于main和master branch：
-            - branch是Git中指向提交记录的可移动指针，用于在同一个仓库中管理多个开发路线；在团队协作中，每个开发者通常会在自己的分支上工作，完成后通过 Pull Request 提交更改。
-            - Git 2.28版本（2020年）以后，默认项目的开发的主干分支由master改为main，可以使用git branch -M main将之前的分支名改为main；可以git branch查看分支名称；
-            - 教程使用的是master，全部替换成我上面的git push -u origin main -f
-         - -u参数（可略过）
-            - -u是--set-upstream 的缩写，用于设置当前本地分支（例如 main）与远程分支（如 origin/main）之间的关联（即上游分支）。git push -u origin main表示设置 （远程）main 分支的上游分支为 origin/main。
-         - git push和git pull命令
-            - git pull 用于从远程仓库获取最新的代码并与本地代码合并（因为可能在github直接编辑）
-               git pull <远程仓库名> <分支名>
-               git pull origin main # 示例
-            - git push 用于将本地仓库中的提交上传到远程仓库。
-               git push <远程仓库名> <分支名>
-               git push origin main# 示例
-            - 如果之前运行过 git push -u origin main 或者是 git push -u origin <分支名>，你已经设置了默认推送分支，之后只需运行 git push 即可将当前本地的文件传到对应分支；
    - 如果本地项目有修改，只需先ssh到github，然后git add和git commit将文件或项目放进暂存区，然后git push到github就行；（第一次上传就是多了将本地项目存放到Git仓库、与远程github关联、设置默认分支这几个步骤）
       - `ssh -T git@github.com`
       - `git add .`
