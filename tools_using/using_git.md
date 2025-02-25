@@ -122,6 +122,6 @@
         - 1、先输入git remote rm origin 删除关联的origin的远程库
         - 2、关联自己的仓库 git remote add origin https://gitee.com/xxxxxx.git
         - 3、最后git push origin master，这样就推送到自己的仓库了。
-    - 报错：`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Failed to connect to github.com port 443 after 21103 ms: Could not connect to server` 
+    - 报错：`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Failed to connect to github.com port 443 after 21103 ms: Could not connect to server` 或者是`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Open SSL SSL_read: SSL_ERROR_SYSCALL, errno 0`
         - 不知道啥原因，有时候重新改一下commit的名字就行；然后使用`git push -u origin main -f`进行推送而不是`git push`；
  
