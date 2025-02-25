@@ -14,9 +14,17 @@
 ## 二、步骤
 1. 购买阿里云服务
     - 登录后，选择对象存储OSS，进入购买；资源包类型就是标准存储包，规格的话个人使用40G足够；
-2. 创建个人key
-    - 进入管理控制台——创建bucket：自定义{bucket_name}，地域选择最近的，读写权限设置为公共读；——点击进入bucket列表，新建自己要用来做图床的目录——复制节点域名{ossxx}——鼠标放到右上角个人账户，点击"AccessKey管理"——先点击继续使用AccessKey，然后再点击创建AccessKey——创建完成后，复制AccessKey ID和AccessKey Secret
-3. 下载picgo和图床配置
+2. 创建bucket
+    - 进入管理控制台——创建bucket：自定义{bucket_name}，地域选择最近的，读写权限设置为公共读；
+        - bucket_name设置为`zangvvv-img`；
+        - 地域为南京
+        - 读写为私有， 
+3. 创建个人key
+    - 点击进入bucket列表，点击自己的bucket名称，新建自己要用来做图床的目录——点击概览，复制节点域名{oss开头}——鼠标放到右上角个人账户，点击"AccessKey管理"——先点击继续使用AccessKey，然后再点击创建AccessKey——创建完成后，复制AccessKey ID和AccessKey Secret；
+        - 新建目录为`figure_bed` 
+        - 节点域名为`oss-cn-nanjing.aliyuncs.com`
+    - 现在不建议开通个人key 
+4. 下载picgo和图床配置
     - 可以去github下载对应的版本；
     - 点击图床设置——点击阿里云OSS，填写设置：
         - 设定KeyId：之前的AccessKey ID

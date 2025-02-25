@@ -118,6 +118,7 @@
         - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。（建议直接使用`git init -b main`）
     - 报错：`error: remote origin already exists`表示远程仓库已经存在，就是你的本地仓库已经关联到了另一个远程仓库，而不是你现在想要关联的仓库，此时进行git push可能报错`fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.`；
         - [![pEls4dH.png](https://s21.ax1x.com/2025/02/23/pEls4dH.png)](https://imgse.com/i/pEls4dH) 
+        - [三种方法解决 fatal: remote origin already exists.](https://blog.csdn.net/qq_34769162/article/details/116379638)
         - [git问题error: remote origin already exists.](https://blog.csdn.net/weixin_43916997/article/details/123645376) ,具体操作如下
         - 1、先输入git remote rm origin 删除关联的origin的远程库
         - 2、关联自己的仓库 git remote add origin https://gitee.com/xxxxxx.git
