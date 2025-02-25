@@ -28,6 +28,8 @@
    - [b站Dlab视频教程——很多软件使用和详细代码](https://www.bilibili.com/video/BV1Jt4y157qA?spm_id_from=333.788.videopod.episodes&vd_source=2523c7055f0985a7f47ca59739b6b086&p=3)
    - [b站数据科学那些事——很多原理与实验设计的知识——2021年](https://www.bilibili.com/video/BV1t34y1U7zW/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
    - [RNA-seq转录组数据分析入门实战](https://www.bilibili.com/video/BV1KJ411p7WN?spm_id_from=333.788.player.switch&vd_source=2523c7055f0985a7f47ca59739b6b086&p=6)
+   - [【生信技能树】转录组测序数据分析](https://www.bilibili.com/video/BV12s41137HY?spm_id_from=333.788.videopod.episodes&vd_source=2523c7055f0985a7f47ca59739b6b086&p=4)
+   - [学徒第2月，RNA-seq数据分析实战训练](https://mubu.com/doc/38y7pmgzLg)
 ### 3.2 具体分析流程
 1. 原始数据上传
     - 有时是自己的数据，就需要本地上传到服务器，这时候需要注意传输过程中的数据完整性； 
@@ -325,13 +327,12 @@
                         - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile；如果后面要使用RSEM进行定量分析，可以再加一个TranscriptomeSAM；
         - <a href="https://imgse.com/i/pEnG9KS"><img src="https://s21.ax1x.com/2025/02/10/pEnG9KS.png" alt="pEnG9KS.png" border="0"></a>
         - 使用Hisat2软件进行比对（效率高内存少，但输出结果仅为比对文件）
-            - 
 4. 表达定量
     - 相关知识
         - FPKM、RPKM、TPM
     - 教程
         - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
-    - 处理原始比对文件
+    - 处理原始比对文件的步骤
         - sam格式转bam格式
         - 对bam文件进行排序
         - 去除比对得分较低序列
@@ -348,7 +349,7 @@
                 - cufflmerge部分将多个样本得到的转录本整合成一套完整的转录本集合，可以去除冗余；
                 - cuffcompare部分可以对两个或多个样本的GTF文件进行比较，也可以用自己整合后的完整转录本与已知的基因注释进行比较来寻找新的转录本；
                 - cuffquant部分：可以对单个BAM文件的基因转录本表达水平进行定量分析；
-                - cuffnorm部分：用cuffquant的输出文件（.cxb）或者cu fflinks的输出文件（.bam）作为输入文件，对所有样本表达水平进行统一的标准化去除数据来源的偏倚，并把标准化后的表达值整合在一个文件中。
+                - cuffnorm部分：用cuffquant的输出文件（.cxb）或者cufflinks的输出文件（.bam）作为输入文件，对所有样本表达水平进行统一的标准化去除数据来源的偏倚，并把标准化后的表达值整合在一个文件中。
             - 安装一致报错，而且要sudo权限貌似，暂时就先用/gss1/env下的学校制作的环境（source一下对应的.env文件即可，退出到其他目录也行）；
         - 简单用法
             - cufflinks主要命令：`cufflinks [options] <aligned_reads.(sam/bam)>`
@@ -400,6 +401,13 @@
    1. KEGG富集
    2. GO富集
    3. reactome富集
-
-
-
+## 四、RNA-seq实验设计
+### 相关问题
+1. 转录组分析是测序深度重要还是生物学重复重要？
+    - 生物学重复对实验结果影响要大得多；
+2. 转录组分析多少生物学重复合适？重复少会出现什么直接后果？
+    - 一般大于6个重复，重复越少，假阴性率越高，你筛选到的差异表达基因越少；但情况并没有你想象的那么糟糕，你筛选到的基因还是值得相信的。
+3. 转录组分析重复不足（n<6）时，会有哪些后果，我们该怎么做？
+    - （1）如果筛选的差异基因很少，当你的实验设计多于两个condition时，就会产生一定的问题。
+    - （2）用更严格的分析方法如，DESeq、edgeR、sleuth等；
+    - （3）差异倍数较大的基因（FC>4）被遗漏的风险较小。 

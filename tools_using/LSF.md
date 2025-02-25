@@ -3,7 +3,7 @@
 ## 一、前言
 1. 背景
     - LSF（load sharing facility）是IBM旗下的一款分布资源管理的工具，用来调度、监视、分析联网计算机的负载，几乎支持所有的主流操作系统，作用上与PBS一样，使用方法略有不同；
-2. 教程（更多的参考qq群里的资料）
+2. 教程（更多的参考南农超算中心的qq群里的资料）
     - [LSF基础和使用（很详细）-2022-04](https://mp.weixin.qq.com/s/u3OQqA7sXyj1iOrrWgUJ1g)
     - [5-Job管理](https://www.bilibili.com/video/BV1dekwY2EiM?spm_id_from=333.788.videopod.sections&vd_source=2523c7055f0985a7f47ca59739b6b086)
 3. 一些概念
@@ -11,7 +11,7 @@
     - compute节点：运行任务作业的主机，南农的普通计算节点CPU核数为28，共38个节点，单个节点内存256G；默认申请配额为56核，1T存储；
     - queue队列：定义了哪些用户可以使用哪些资源
     - 作业核数：用户运行作业需要调用的compute主机的核心数量
-    - 串行作业
+    - 串行作业：
     - 并行作业
 4. 超算平台使用注意事项
     - 禁止在login直接运行计算任务。Login节点功能为登录，上传下载数据，提交作业，安全软件。
@@ -23,21 +23,23 @@
 1. bsub命令直接提交
     - 与PBS不同，大部分情况下，可以不需要写作业脚本，直接一行命令就可以提交作业；使用展示如下：
         - <a href="https://imgse.com/i/pEQocd0"><img src="https://s21.ax1x.com/2025/02/21/pEQocd0.png" alt="pEQocd0.png" border="0"></a>
+        - 之前运行过的一个例子：`bsub -q normal -o %J.out -e %J.err -R span[hosts=1] -n 16 cufflinks -o tmp_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fr-unstranded tmp_mapping/accepted_hits.bam`
     - 主要命令：`busb -n Z -q QUEUENAME -o OUTPUTFILE COMMAND`
-        - -n Z：提交作业需要的线程数；
+        - -n Z：提交作业需要的线程数；（好像如果command里面有线程数参数会被这个bsub -n给覆盖，实际会启动bsub参数的线程数，但具体有没有用不确定，所以两个最好写的一致；
         - -q QUEUENAME：指定作业提交的队列。如果不添-q选项，系统将把作业提交到默认的作业队列；
-        - -J：
+        - -J：作业名称
+        - -R span[hosts=1]：节点数；
+        - -o OUTPUTFILE表示输出文件名，作业提交后的输出到标准输出信息将会保存在这个文件中，一般情况下，outputfile作为日志文件；改了好像也没用诶。
         - -i inputfile：表示程序要读入的文件名（不常用）；
-        - -o OUTPUTFILE表示输出文件名，作业提交后的输出到标准输出信息将会保存在这个文件中，一般情况下，outputfile作为日志文件；
         - COMMAND：就是你的程序命令，可以不用""括起来，也可是自己的脚本（需要用python xxx.py，如果是sh脚本前面也要加一个sh）；
-            - 对于串行作业，对于串行作业，COMMAND可以直接使用您的程序名。例如，将串行程序mytest的通过LSF提交到normal队列：`bsub-n 1-q normal -o mytest.out ./mytest`
-            - 对于MPI并行作业，COMMAND的格式为mpich_gm PROG_NAME。例如，将并行程序mytest，通过LSF提交，使用16个线程运行这个作业：`bsub-n 16 -q normal-o mytest.out mpich_gm mytest`
+            - 对于串行作业，对于串行作业，COMMAND可以直接使用您的程序名。例如，将串行程序mytest的通过LSF提交到normal队列：`bsub -n 16 -q normal -o mytest.out ./mytest`
+            - 对于MPI并行作业，COMMAND的格式为mpich_gm PROG_NAME。例如，将并行程序mytest，通过LSF提交，使用16个线程运行这个作业：`bsub -n 16 -q normal-o mytest.out mpich_gm mytest`
     - bsub命令使用注意事项
-        - 一般情况下，如果你用bsub提交任务只需在你提交的命令前加上bsub，然后回车提交即可，然后使用bjobs查看提交作业的状态；当你提交任务后，立即输入bjobs，此时的状态一般是PEDN（STAT那一列），这是任务在等待分配，并不是错误信息。数秒过后，将会显示RUN状态。
+        - 一般情况下，如果你用bsub命令提交任务只需在你提交的命令前加上bsub，然后回车提交即可，然后使用bjobs查看提交作业的状态；当你提交任务后，立即输入bjobs，此时的状态一般是PEDN（STAT那一列），这是任务在等待分配，并不是错误信息。数秒过后，将会显示RUN状态。
         - 如果先书写bsub，则后面不支持tab补齐功能。建议大家，先书写提交的任务，最后在前面添加bsub；
         - bsub不支持如shell中的文本处理工具，如awk，sed、、grep、1等等命令行，若想提交此类任务，务必编写lsf脚本提交此类作业；如下图所示，我想用shell中的管道命令使用bsub提交任务。
 2. 使用lsf脚本进行提交
-    1. 首先创建一个lsf后缀或者sh后缀的脚本文件yourjob_lsf，内容如下：
+    1. 首先创建一个lsf后缀或者sh后缀的脚本文件yourjob_lsf，内容模板如下：
         - 串行作业lsf脚本（单节点） 
             ```
             #BSUB -J bowtie：作业名称，也可以不写
@@ -89,7 +91,7 @@
         - SSUSP 系统所挂起的作业所使用的核数
         - USUSP 用户自行挂起的作业所使用的核数
         - RSV 系统为你预约所保留的核数
-## 批量进行作业处理（分别对应在/gss1/home/huangju02/hj/vvv/RNA-seq_practice/0_data下的三个trimmomatic脚本）
+## 批量进行作业处理
 1. 方法一：建立一个shell脚本，脚本内包括shell的for循环将命令写成一个个脚本，然后用for循环去使用bsub命令提交作业；
     - 示例：
         - <a href="https://imgse.com/i/pEl7VFP"><img src="https://s21.ax1x.com/2025/02/23/pEl7VFP.png" alt="pEl7VFP.png" border="0"></a>
@@ -97,7 +99,7 @@
         - <a href="https://imgse.com/i/pEl7UlF"><img src="https://s21.ax1x.com/2025/02/23/pEl7UlF.png" alt="pEl7UlF.png" border="0"></a>
         - <a href="https://imgse.com/i/pEl7GF0"><img src="https://s21.ax1x.com/2025/02/23/pEl7GF0.png" alt="pEl7GF0.png" border="0"></a>
 2. 方法二：直接在shell脚本中执行for循环并使用bsub提交命令；
-    - 示例：
+    - 示例：（只有这个结果文件还保留着）
         - <a href="https://imgse.com/i/pEl7Aot"><img src="https://s21.ax1x.com/2025/02/23/pEl7Aot.png" alt="pEl7Aot.png" border="0"></a>
     - 耗时：
         - <a href="https://imgse.com/i/pEl73oq"><img src="https://s21.ax1x.com/2025/02/23/pEl73oq.png" alt="pEl73oq.png" border="0"></a>
@@ -108,4 +110,4 @@
     - 耗时：
         - <a href="https://imgse.com/i/pEl7YWT"><img src="https://s21.ax1x.com/2025/02/23/pEl7YWT.png" alt="pEl7YWT.png" border="0"></a>
         - <a href="https://imgse.com/i/pEl7NSU"><img src="https://s21.ax1x.com/2025/02/23/pEl7NSU.png" alt="pEl7NSU.png" border="0"></a>
-三种都是有效的；（第一个批量20分钟，第二个50分钟，第三个花费4个多小时（实际上是早上8点51开始的），前两个都是多个bsub作业，最后一个只有一个作业）
+这三个方法分别写在/gss1/home/huangju02/hj/vvv/RNA-seq_practice/0_data下的三个trimmomatic脚本；三种方法都是有效的；（第一个批量20分钟，第二个50分钟，第三个花费4个多小时（实际上是早上8点51开始的），前两个都是多个bsub作业，最后一个只有一个作业）

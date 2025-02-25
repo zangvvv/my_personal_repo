@@ -37,11 +37,30 @@
 ## 四、建立基因组索引
 已经确认下载的基因组文件和gff文件所用的染色体序号一致；然后将基因组的fa文件和所建立的索引放在一个目录下；
 由于需要索引文件前缀和基因组文件前缀一样，所以统一改成(我转录组也改了)，`Oryza_sativa_mh63.MH63RS2.60`，建立基因组索引的代码为：`bowtie2-build -t 12 ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.fa ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60`花费了大概7分钟
+1. 现在版本`bowtie2-build -t 12 ./3_index/Oryza_sativa_mh63.MH63RS2.60.fa ./3_index/Oryza_sativa_mh63.MH63RS2.60`，结果和之前一致；
 ## 五、比对
 建立转录组索引，`tophat2 -G Oryza_sativa_mh63.MH63RS2.60.gff3 --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60` 花费了大概3分钟。
+1. 正式版本：`tophat2 -G Oryza_sativa_mh63.MH63RS2.60.gff3 --transcriptome-index=3_index/Oryza_sativa_mh63.MH63RS2.60.tr ./3_index/Oryza_sativa_mh63.MH63RS2.60`，结果也和之前一样；
+2. mapping的正式版本
+   ```
+    #!/bin/bash
+    # 遍历生成脚本
+    for file in `ls /gss1/home/huangju02/hj/vvv/RNA-seq_practice/2_clean_data/*_paired.fastq.gz`
+    do
+    j=`basename $file` # 这一步是提取出文件名，而"${j%%_*}"会提取到样本名
+    echo "tophat2 -p 14 -o /gss1/home/huangju02/hj/vvv/RNA-seq_practice/4_mapping_tophat/result_${j%%_*} --transcriptome-index=/gss1/home/huangju02/hj/vvv/RNA-seq_practice/3_index/Oryza_sativa_mh63.MH63RS2.60.tr /gss1/home/huangju02/hj/vvv/RNA-seq_practice/3_index/Oryza_sativa_mh63.MH63RS2.60 \
+    /gss1/home/huangju02/hj/vvv/RNA-seq_practice/2_clean_data/${j%%_*}_1_paired.fastq.gz /gss1/home/huangju02/hj/vvv/RNA-seq_practice/2_clean_data/${j%%_*}_2_paired.fastq.gz" > \
+    /gss1/home/huangju02/hj/vvv/RNA-seq_practice/0_data/lsf_path/${j%%_*}_mapping.sh
+    done
+
+    # 提交队列
+    for i in `ls /gss1/home/huangju02/hj/vvv/RNA-seq_practice/0_data/lsf_path/*_mapping.sh`;do
+    bsub -n 24 -q normal -R span[hosts=1] -o %J.out -e %J.err sh ${i}
+    done
+   ``` 
 接着mapping， `tophat2 -p 8 -o ./4_mapping_tophat --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60 tmp_trim/SRR_92_r1.clean.fq.gz tmp_trim/SRR_92_r2.clean.fq.gz` 成功！耗时52分钟
 ## 六、表达定量
-`cufflinks -o 5_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fphat/accepted_hits.bam` 耗时35分钟，中间有过暂停很久不动的情况。
+`cufflinks -o 5_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fr-unstranded 4_mapping_tophat/accepted_hits.bam` 耗时35分钟，中间有过暂停很久不动的情况。
 ## 张一柯
 fastqc、trimmomatic质控，star比对，用subread的featureCounts;
 
