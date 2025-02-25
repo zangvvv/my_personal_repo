@@ -389,13 +389,15 @@
                 - --library-type：默认值fr-unstranded，这是Illumina TruSeq的文库类型；
                 - {merged.gtf}：Cuffmerge的merged.gtf结果，不过应该也可以单个样本的transcripts.gtf；
                 - {$sample/accepted_hits.bam}：可以是sam的，也可以是bam格式的；
-            - cuffdiff主要命令：`cuffdiff --lables lable1,lable2 -p 8 --time-series --multi-read-correct --library-type fr-unstranded --poisson-dispersion transcripts.gtf sample1.sam sample2.sam`
+            - cuffdiff主要命令：`cuffdiff -o diff_out -b Ref_Genome/$idx_prefix.fa -p 8 –L C1,C2 -u {transcripts.gtf} {sample1_replicate1.sam[,...,sample1_replicateM.sam]} {sample2_replicate1.sam[,...,sample2_replicateM.sam]}... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`
                 - cuffdiff用来寻找差异表达的基因（转录本）；
                 - -o：文件输出目录；
                 - -p：线程数；
-                - -b：同cuffquant的-b
-                - -L|--lables default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable；
+                - -b：同cuffquant的-b参数；
+                - {transcripts.gtf}：之前的cuffmerge的结果merge.gtf，当然也支持单个样本的gtf文件，或者其他来源的；
+                - -L|--lables default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable； 
                 - -T|--time-series：让Cuffdiff来按样品顺序来比对样品，而不是对所有的samples都进行两两比对。即第二个SAM和第一个SAM比；第三个SAM和第二个SAM比；第四个SAM和第三个SAM比...
+                - `{sample1_replicate1.sam[,...,sample1_replicateM.sam]} {sample2_replicate1.sam[,...,sample2_replicateM.sam]}... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`：所有样本及其重复的bam或sam文件（或者也可以是cuffquant的结果文件CXB files，但请所有样本保持一致），比如有三个样本C1、C2、C3，每个样本2个重复R1、R2，则可以写成`C1_R1.sam,C1_R2.bam,C2_R1.bam C2_R2.bam,C3_R1.bam,C3_R2.bam`，样本重复数可以不一样；
             - cuffnorm主要命令：`cuffnorm --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm -q -p 6 -L`
    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
    1. 基因表达定量
