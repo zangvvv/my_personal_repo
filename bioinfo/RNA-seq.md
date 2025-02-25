@@ -366,18 +366,37 @@
                 - transcripts.gtf：包含Cufflinks的组装结果，前7列为标准的GTF格式，最后一列为attributes；
                 - ispforms.fpkm_tracking：isoforms(可以理解为gene的各个外显子)的fpkm计算结果；
                 - genes.fpkm_tracking：gene的fpkm计算结果；
-            - cuffmerge主要命令：`cuffmerge -o ./merged_asm -p 8 assembly_list.txt`
-                - 可以将各个Cufflinks生成的transcripts.gtf文件融合称为一个更加全面的transcripts注释结果文件merged.gtf。以利于用Cuffdiff来分析基因差异表达。 
-                - -o：文件输出目录；
-                - assembly_list.txt：需要先将所有需要整合的GTF文件所在的路径保存在assemblies.txt文件中。另外使用-g参数还可以在整合时加入额外的参考注释GTF文件，将已知的转录本和新的转录本融合在一起。
-            - cuffcompare主要命令：`cuffcompare -o cuffcmp cuff1.gtf cuff2.gtf ...`
-                - -o：输出文件的前缀；
+            - cuffcompare主要命令：`cuffcompare -o {cuffcmp} cuff1.gtf cuff2.gtf ...`
+                - 好像是用来比较你用cufflinks组装出来的转录本与参考注释的结果进行比较，判断与已知的转录本是否匹配，还是此转录本为新的转录本。
+                - -o {outprefix}：输出文件的前缀；默认是cuffcmp；
+                - {cuff1.gtf}：由cufflinks产生的gtf文件；
+                - -r {gtf|gff}：参考注释文件；
+                - 结果文件：
+                    - 其中的combined.gtf包含了在所有样本中都有的转录本；
+            - cuffmerge主要命令：`cuffmerge -o ./merged_sam -g gtf -p 8 {assembly_list.txt}`
+                - 可以将各个Cufflinks生成的transcripts.gtf文件融合称为一个更加全面的transcripts注释结果文件merged.gtf。这一步的工作就是方便后面用Cuffdiff来分析基因差异表达。 
+                - -o {outprefix}：文件输出目录，整合的gtf为{outprefix}/merged.gtf；
+                - -p {int}：线程数；
+                - -g|--ref-gtf：参考注释；
+                - {assembly_list.txt}：需要先将所有需要整合的GTF文件所在的路径保存在assemblies.txt文件中。另外使用-g参数还可以在整合时加入额外的参考注释GTF文件，将已知的转录本和新的转录本融合在一起。
+            - cuffquant主要命令：`cuffquant -o ./ -p 6 -b Ref_Genome/$idx_prefix.fa -u --max-bundle-frags 50000000 --library-type fr-unstranded {merged.gtf} {$sample/accepted_hits.bam}`
+                - cuffquant是cuffquant能够对单个 BAM 文件的基因转录本表达水平进行定量分析。生成的是CXB文件abundances.cxb，可以作为cuffdiff的输入，这会加快cuffdiff的运行速度。也可以作为Cuffnorm的输入。
+                - -o：文件输出目录；输出的是一个二进制的abundances.cxb文件，可以用于cuffdiff和cuffnorm；
+                - -p：线程数；
+                - -b|--frag-bias-correct {genome.fa}：有文章说这个是`samtools faidx Ref_Genome/Genome.fasta`构建的基因组索引，但是这个faidx的结果不是fai后缀的吗，也不是fasta格式啊，暂时就不写吧；
+                - -u：可以提高精度；
+                - --max-bundle-frags：一个位点被所具有的片段的最大数量，超过这个数量将被剔除；默认是1000000；有教程设置为50000000；但是riceENCODE的pipeline直接默认，并且上面的-b参数也没有写；
+                - --library-type：默认值fr-unstranded，这是Illumina TruSeq的文库类型；
+                - {merged.gtf}：Cuffmerge的merged.gtf结果，不过应该也可以单个样本的transcripts.gtf；
+                - {$sample/accepted_hits.bam}：可以是sam的，也可以是bam格式的；
             - cuffdiff主要命令：`cuffdiff --lables lable1,lable2 -p 8 --time-series --multi-read-correct --library-type fr-unstranded --poisson-dispersion transcripts.gtf sample1.sam sample2.sam`
-                - -L|--lables   default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable；
+                - cuffdiff用来寻找差异表达的基因（转录本）；
+                - -o：文件输出目录；
+                - -p：线程数；
+                - -b：同cuffquant的-b
+                - -L|--lables default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable；
                 - -T|--time-series：让Cuffdiff来按样品顺序来比对样品，而不是对所有的samples都进行两两比对。即第二个SAM和第一个SAM比；第三个SAM和第二个SAM比；第四个SAM和第三个SAM比...
-            - cuffquant主要命令：`cuffquant -o ./ -p 6 -b Ref_Genome/$idx_prefix.fa -u  --max-bundle-frags  50000000  --library-type fr-unstranded Cuffmerge/merged.gtf Tophat/$sample/accepted_hits.bam &` 
-                - cuffquant是cuffquant能够对单个 BAM 文件的基因转录本表达水平进行定量分析。生成的是CXB文件abundances.cxb,，可以作为cuffdiff的输入，这会加快cuffdiff的运行速度。也可以作为Cuffnorm的输入。
-            - cuffnorm主要命令：`cuffnorm --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm -q -p 6 -L` 
+            - cuffnorm主要命令：`cuffnorm --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm -q -p 6 -L`
    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
    1. 基因表达定量
    2. 表达矩阵的标准化/normalization

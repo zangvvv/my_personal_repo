@@ -60,7 +60,14 @@
    ``` 
 接着mapping， `tophat2 -p 8 -o ./4_mapping_tophat --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60 tmp_trim/SRR_92_r1.clean.fq.gz tmp_trim/SRR_92_r2.clean.fq.gz` 成功！耗时52分钟
 ## 六、表达定量
+转录本组装：（批量的写在脚本里）
 `cufflinks -o 5_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fr-unstranded 4_mapping_tophat/accepted_hits.bam` 耗时35分钟，中间有过暂停很久不动的情况。
+转录本比较：(批量的写在脚本里，但由于运行很快，所以直接在compute01中运行了)
+`cuffcompare -r Oryza_sativa_mh63.MH63RS2.60.gff3 -o tmp_cuffcompare/SRR10751892 tmp_cufflinks/transcripts.gtf`
+整合转录本：也很快（5分钟不到），直接运行，单样本的就不用做了
+`cuffmerge -o 7_cuffmerge/ -g Oryza_sativa_mh63.MH63RS2.60.gff3 -p 16 assembly_list.txt `
+转录本定量
+`cuffquant -o tmp_cuffquant/ -p 16 -u --library-type fr-unstranded Oryza_sativa_mh63.MH63RS2.60.gff3 tmp_mapping_2/accepted_hits.bam`，20分钟吧
 ## 张一柯
 fastqc、trimmomatic质控，star比对，用subread的featureCounts;
 
