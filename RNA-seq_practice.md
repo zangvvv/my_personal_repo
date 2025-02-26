@@ -37,7 +37,7 @@
 ## 四、建立基因组索引
 已经确认下载的基因组文件和gff文件所用的染色体序号一致；然后将基因组的fa文件和所建立的索引放在一个目录下；
 由于需要索引文件前缀和基因组文件前缀一样，所以统一改成(我转录组也改了)，`Oryza_sativa_mh63.MH63RS2.60`，建立基因组索引的代码为：`bowtie2-build -t 12 ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.fa ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60`花费了大概7分钟
-1. 现在版本`bowtie2-build -t 12 ./3_index/Oryza_sativa_mh63.MH63RS2.60.fa ./3_index/Oryza_sativa_mh63.MH63RS2.60`，结果和之前一致；
+1. 正式版本`bowtie2-build -t 12 ./3_index/Oryza_sativa_mh63.MH63RS2.60.fa ./3_index/Oryza_sativa_mh63.MH63RS2.60`，结果和之前一致；
 ## 五、比对
 建立转录组索引，`tophat2 -G Oryza_sativa_mh63.MH63RS2.60.gff3 --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr ./MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60` 花费了大概3分钟。
 1. 正式版本：`tophat2 -G Oryza_sativa_mh63.MH63RS2.60.gff3 --transcriptome-index=3_index/Oryza_sativa_mh63.MH63RS2.60.tr ./3_index/Oryza_sativa_mh63.MH63RS2.60`，结果也和之前一样；
@@ -58,16 +58,29 @@
     bsub -n 24 -q normal -R span[hosts=1] -o %J.out -e %J.err sh ${i}
     done
    ``` 
-接着mapping， `tophat2 -p 8 -o ./4_mapping_tophat --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60 tmp_trim/SRR_92_r1.clean.fq.gz tmp_trim/SRR_92_r2.clean.fq.gz` 成功！耗时52分钟
+接着（单样本的）mapping， `tophat2 -p 8 -o ./4_mapping_tophat --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60 tmp_trim/SRR_92_r1.clean.fq.gz tmp_trim/SRR_92_r2.clean.fq.gz` 成功！耗时52分钟
 ## 六、表达定量
 转录本组装：（批量的写在脚本里）
 `cufflinks -o 5_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fr-unstranded 4_mapping_tophat/accepted_hits.bam` 耗时35分钟，中间有过暂停很久不动的情况。
 转录本比较：(批量的写在脚本里，但由于运行很快，所以直接在compute01中运行了)
 `cuffcompare -r Oryza_sativa_mh63.MH63RS2.60.gff3 -o tmp_cuffcompare/SRR10751892 tmp_cufflinks/transcripts.gtf`
-整合转录本：也很快（5分钟不到），直接运行，单样本的就不用做了
+整合转录本：也很快（5分钟不到），直接运行，单样本的做不了就不用做了
 `cuffmerge -o 7_cuffmerge/ -g Oryza_sativa_mh63.MH63RS2.60.gff3 -p 16 assembly_list.txt `
-转录本定量
-`cuffquant -o tmp_cuffquant/ -p 16 -u --library-type fr-unstranded Oryza_sativa_mh63.MH63RS2.60.gff3 tmp_mapping_2/accepted_hits.bam`，20分钟吧
+结果是一个merged.gtf文件和一个logs目录；
+转录本定量：（批量的写在脚本里，耗时大概2个多小时）
+`cuffquant -o tmp_cuffquant/ -p 16 -u --library-type fr-unstranded Oryza_sativa_mh63.MH63RS2.60.gff3 tmp_mapping_2/accepted_hits.bam`，单样本的大概十几分钟吧
+### 差异表达分析cuffdiff
+1. 首先获取SRR编号与样本及重复数对应关系
+    - 因为之前所有的结果都是以SRR样本号进行标记的，而进行差异表达分析的时候需要对样本进行分组，所以首先去sra数据下载地址，下载到所选样本的metadata文件（csv格式，本文所有样本重复数为2）
+    - 复制run和source_name两列内容保存到一个metadata.txt文件中；
+2. 执行cuffdiff
+    - 三个样本的话大概半个小时：(批量的写在cuffdiff.lsf脚本里，一共8个样本，每个样本各2个重复，耗时2个多小时)
+        ```
+            cuffdiff -o tmp_cuffdiff/ -p 16 -L MH63_yf,MH63_pc,MH63_rt -u 7_cuffmerge/merged.gtf 8_cuffquant/quant_SRR10751892/abundances.cxb,8_cuffquant/quant_SRR10751893/abundances.cxb 8_cuffquant/quant_SRR10751894/abundances.cxb,8_cuffquant/quant_SRR10751895/abundances.cxb 8_cuffquant/quant_SRR10751896/abundances.cxb,8_cuffquant/quant_SRR10751897/abundances.cxb
+        ``` 
+### 标准化cuffnorm
+三样本测试大概三分钟就有结果了（全部样本的写在cuffnorm.lsf脚本里，耗时也只有两三分钟）
+`cuffnorm -o tmp_cuffnorm/ -p 16 -L MH63_yf,MH63_pc,MH63_rt --no-update-check 7_cuffmerge/merged.gtf 8_cuffquant/quant_SRR10751892/abundances.cxb,8_cuffquant/quant_SRR10751893/abundances.cxb 8_cuffquant/quant_SRR10751894/abundances.cxb,8_cuffquant/quant_SRR10751895/abundances.cxb 8_cuffquant/quant_SRR10751896/abundances.cxb,8_cuffquant/quant_SRR10751897/abundances.cxb`
 ## 张一柯
 fastqc、trimmomatic质控，star比对，用subread的featureCounts;
 
