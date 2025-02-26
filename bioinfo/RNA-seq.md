@@ -380,7 +380,7 @@
                 - -g|--ref-gtf：参考注释；
                 - {assembly_list.txt}：需要先将所有需要整合的GTF文件所在的路径保存在assemblies.txt文件中。另外使用-g参数还可以在整合时加入额外的参考注释GTF文件，将已知的转录本和新的转录本融合在一起。
             - cuffquant主要命令：`cuffquant -o ./ -p 6 -b Ref_Genome/$idx_prefix.fa -u --max-bundle-frags 50000000 --library-type fr-unstranded {merged.gtf} {$sample/accepted_hits.bam}`
-                - cuffquant是cuffquant能够对单个 BAM 文件的基因转录本表达水平进行定量分析。生成的是CXB文件abundances.cxb，可以作为cuffdiff的输入，这会加快cuffdiff的运行速度。也可以作为Cuffnorm的输入。
+                - cuffquant是cuffquant能够对单个 BAM 文件的基因转录本表达水平进行定量分析。生成的是CXB文件abundances.cxb，可以作为cuffdiff的输入，**这会加快cuffdiff的运行速度**。也可以作为Cuffnorm的输入。
                 - -o：文件输出目录；输出的是一个二进制的abundances.cxb文件，可以用于cuffdiff和cuffnorm；
                 - -p：线程数；
                 - -b|--frag-bias-correct {genome.fa}：有文章说这个是`samtools faidx Ref_Genome/Genome.fasta`构建的基因组索引，但是这个faidx的结果不是fai后缀的吗，也不是fasta格式啊，暂时就不写吧；
@@ -392,13 +392,58 @@
             - cuffdiff主要命令：`cuffdiff -o diff_out -b Ref_Genome/$idx_prefix.fa -p 8 –L C1,C2 -u {transcripts.gtf} {sample1_replicate1.sam[,...,sample1_replicateM.sam]} {sample2_replicate1.sam[,...,sample2_replicateM.sam]}... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`
                 - cuffdiff用来寻找差异表达的基因（转录本）；
                 - -o：文件输出目录；
-                - -p：线程数；
                 - -b：同cuffquant的-b参数；
+                - -p：线程数；
+                - -u：使结果更加准确的参数；：
+                - -L|--lables {C1,C2}；给每个sample一个样品名或者一个环境条件一个lable；default: q1,q2,...qN；
                 - {transcripts.gtf}：之前的cuffmerge的结果merge.gtf，当然也支持单个样本的gtf文件，或者其他来源的；
-                - -L|--lables default: q1,q2,...qN；给每个sample一个样品名或者一个环境条件一个lable； 
+                - --library-type：类似之前，默认就是fr-unstranded，可以不写；
+                - --no-update-check：不检查cufflinks是否是最新版；
                 - -T|--time-series：让Cuffdiff来按样品顺序来比对样品，而不是对所有的samples都进行两两比对。即第二个SAM和第一个SAM比；第三个SAM和第二个SAM比；第四个SAM和第三个SAM比...
                 - `{sample1_replicate1.sam[,...,sample1_replicateM.sam]} {sample2_replicate1.sam[,...,sample2_replicateM.sam]}... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`：所有样本及其重复的bam或sam文件（或者也可以是cuffquant的结果文件CXB files，但请所有样本保持一致），比如有三个样本C1、C2、C3，每个样本2个重复R1、R2，则可以写成`C1_R1.sam,C1_R2.bam,C2_R1.bam C2_R2.bam,C3_R1.bam,C3_R2.bam`，样本重复数可以不一样；
-            - cuffnorm主要命令：`cuffnorm --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm -q -p 6 -L`
+                - cuffdiff默认比较两两对照之间的关系，如果想要比较特定组别之间的关系，可以指定一个tab分隔的contrast.txt文件，然后用-C {contrasts.txt}参数，该文件首行为列名，如：
+                    ```
+                    condition_A	condition_B
+                    Ctrl	Mutant_X
+                    Ctrl	Mutant_Y
+                    Ctrl	Mutant_Z
+                    ```  
+                - 示例（来自软件的pipeline-paper，不过应该是version1）：
+                    ```
+                    cuffdiff -o diff_out -b {genome.fa} -p 8 –L C1,C2 -u merged_asm/merged.gtf \ 
+                    ./C1_R1_thout/accepted_hits.bam,./C1_R2_thout/accepted_hits.bam,./C1_R3_thout/ accepted_hits.bam \ 
+                    ./C2_R1_thout/accepted_hits.bam,./C2_R3_thout/accepted_hits.bam,./C2_R2_thout/ accepted_hits.bam
+                    ```
+            - cuffdiff结果
+                1. FPKM tracking files：
+                    - 基因或CDS或transcript的在每个样本中的FPKM值，包括isoforms、genes、cds、tss_groups为前缀的tracking_file的文件，分别代表转录本、基因、编码序列和Primary transcript（初级转录本，纲转录完的DNA的拷贝）的FPKM；
+                2. Count tracking files：
+                    - 类似上面的FPKM tracking files，只不过计算的是counts数而不是FPKM值，同样有四个文件；
+                3. Read group tracking files
+                    - 展现各个样本的每个重复的FPKM值，和上面一样也包含四个文件；
+                4. Differential expression tests
+                    - 针对转录本或基因或cds在两两样本间的差异表达检验信息，包含log2(fold_change)、显著值等信息；同样包括四个以`_exp.diff`结尾的文件；
+                5. Differential splicing tests - splicing.diff
+                    - 不同isoform之间的可变剪切检验，只有多个isoforms的primary transcripts才有这些信息；一般没用吧，可能在研究可变剪切中需要用到；
+                6. Differential coding output - cds.diff
+                    - 同上；
+                7. Differential promoter use - promoters.diff
+                    - 探究样本间的启动子使用频率的差异，只有基因有两个或多个primary transcripts才有此信息；
+                8. 其它文件：
+                    - `Read group info - read_groups.info`陈列了使用该软件输入的样本文件的基因信息；
+                    - `Run info - run.info`展示软件运行的参数和软件信息；
+            - cuffnorm主要命令：`cuffnorm -p 6 -L --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm <transcripts.gtf> <sample1_replicate1.sam[,...,sample1_replicateM.sam]> <sample2_replicate1.sam[,...,sample2_replicateM.sam]>... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`
+                - 用于对表达值进行标准化，和cuffdiff的输入输出有点类似，不过它包含的是标准化后的fragment counts；
+                - 有和cuffdiff一样的-o、-L、-p、--library-type、--no-update-check参数，但是没有-b、-u等参数；
+                - cuffnorm不像cuffdiff进行差异表达分析；它的输出结果的格式和cuffdiff不一样，如果想要和cuffdiff一致，可以使用`--output-format cuffdiff`参数来指定输出结果；cuffnorm；它输出的标准化后的raw counts，所以后面想要进行下游的差异表达工具，必须是要能接受raw counts作为输入的工具；（DeSeq2应该是可以的吧）
+                - cuffdiff和cuffnorm都支持一个--use-sample-sheet参数，可以用来声明你的样本的label和对应的sam或bam文件的对应关系，感觉作用不大；
+            - cuffnorm结果文件
+                1. Simple-table expression format：
+                    - 包含cds、genes、isoforms、tss_groups前缀的*.fpkm_table files and *.count_table files，第一列为id，第二列为`The FPKM value (for *.fpkm_table files) or normalized fragment count (for *.count_table files) for this feature in replicate N of conditionX`；
+                2. Simple-table gene attributes format
+                    - 以attr_table结尾、包含对应的基因或转录本或cds的metadata；
+                3. Simple-table sample attributes format
+                    - 名为samples.table文件，包含样本的一些信息，无关紧要；
    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
    1. 基因表达定量
    2. 表达矩阵的标准化/normalization
