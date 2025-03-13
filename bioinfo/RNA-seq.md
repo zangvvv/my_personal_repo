@@ -30,6 +30,8 @@
    - [RNA-seq转录组数据分析入门实战](https://www.bilibili.com/video/BV1KJ411p7WN?spm_id_from=333.788.player.switch&vd_source=2523c7055f0985a7f47ca59739b6b086&p=6)
    - [【生信技能树】转录组测序数据分析](https://www.bilibili.com/video/BV12s41137HY?spm_id_from=333.788.videopod.episodes&vd_source=2523c7055f0985a7f47ca59739b6b086&p=4)
    - [学徒第2月，RNA-seq数据分析实战训练](https://mubu.com/doc/38y7pmgzLg)
+   - [小白学生信（一）](https://mp.weixin.qq.com/s/_lc-pEMeQP-pSATWKVhITA)
+   - [小白学生信（二）](https://mp.weixin.qq.com/s/q-wKhmPuDc968eGlttTHHA)
 ### 3.2 具体分析流程
 1. 原始数据上传
     - 有时是自己的数据，就需要本地上传到服务器，这时候需要注意传输过程中的数据完整性； 
@@ -39,7 +41,8 @@
 2. 原始数据下载（如果不是直接得到的话）
     1. 相关知识
         1. [GEO和SRA数据库](https://phantom-aria.github.io/2022/05/04/a.html)
-           - GEO数据库是基因表达数据库，一般提供的都是中间文件，比如转录组数据的表达矩阵，芯片数据的中间注释文件，单细胞测序的细胞注释，突变的vcf突变文件等等。部分文章只提供SRA。（点击`SRA run selector`进入样本下载界面） 
+            - [GEO数据库挖掘，基因表达矩阵的下载与生成（R语言）--看看前面的文件介绍就行](https://www.bilibili.com/video/BV1A94y1f7Ec/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+            - GEO数据库是基因表达数据库，一般提供的都是中间文件，比如转录组数据的表达矩阵（即最下面提供的series_matrix.txt，其中以！开头的都是项目信息和样本信息），芯片数据的中间注释文件，单细胞测序的细胞注释，突变的vcf突变文件等等。部分文章只提供SRA。（点击`SRA run selector`进入样本下载界面） 
            - SRA数据库，存储原始测序数据的数据库
         2. GEO数据库的GPL（platform）、GSM（Sample）、GSE（Series）
            - 文章提供的是NCBI的GSE number：比如练习数据GSE142570；点击链接进入后可以看到以GPL、GSE、GSM开头的编号；其中GPL表示测序用的平台、GSE代表一系列相关样本组成的数据集、GSM代表单个样本的数据记录，还包含该样本的的详细元数据（如实验条件、处理方式、生物学重复等），一个GSM可以是单独的样本，也可以是多样本的实验组。也就是说GSE和GSM是一对多的关系，每个GSE包含多个GSM。
@@ -47,7 +50,7 @@
         3. SRA数据库的SRP（Project）、SRS(样本 Sample)、SRX(数据产生 Experiment)、SRR（Read Run）
            - SRR是一次测序的数据，与GSM的关系不大。一个GSM可能对应多个SRR（一个样本测多次），一个SRR也可能对应多个GSM的数据（一次测多个样本）。
            - SRP代表一个实验项目，包含多个SRR。
-    2. 测序数据下载
+    2. 测序数据下载（下载完后注意数据完整性，可以比较文件大小以及查看日志有无报错）
         - 本地下载
             - [利用TBtools转换XML文件得到网址列表](https://www.bilibili.com/video/BV19u411k7GJ/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
             - 利用excel快速获取生成项目中所有的SRA序列号文件:视频已经不见，不太重要
@@ -102,7 +105,7 @@
                 - 这个好像需要更大的空余内存，同样的命令有小报错'Disk quota exceeded'，快好像没有体会到。
                 - 对SRRxxxx还是SRRxxxx.sra效果也是一样的
                 - 同样支持--fasta参数直接转成fasta文件
-3. 原始数据质控和比对
+3. 原始数据质控和比对（trim之后可以再进行一次fastqc
     1. 相关知识 
     2. 质量评估（也是质控的一环）
         - 教程
@@ -220,12 +223,12 @@
                     - --length 35：输出reads长度阈值，小于35bp的reads会被抛弃。
                     - --stringency 3：可以容忍的前后adapter重叠的碱基数为3。
                     - --paired：针对双端测序结果，单端测序直接省略，以及接受一个输入文件即可。
-                    - -o：指定输出目录;-j可指定线程数，还是内核？？
+                    - -o：指定输出目录；-j可指定线程数，还是内核？反正两者是在一台主机上成正比的参数，而节点数则是主机数；
                     - --fastqc:可以质控完后运行FastQC，使用--fastqc_args指定传递给FastQC的参数。
                     - --gzip：将输出结果压缩为gzip格式。
                     - --max_n：一条read在被完全删除之前可能包含的N的总数，别人的示例为4。
                     - -e设置最大错误率：默认为0.1，应该是比较常用的。   
-    4. 比对（此处主要指有参比对，而且是基于基因组比对，无参比对可以用Trinity，基于转录本比对可以用RSEM）
+    4. 比对（此处主要指有参比对，而且是基于基因组比对，无参比对可以用Trinity，基于转录本比对可以用RSEM，各个比对软件构建的index不能互用，能输出成bam就不要输出成sam，而且后缀是sam内容不一定是sam，比如subjunc软件默认输出的就是bam文件；比对之后有一个samtools flagstat命令可以进行比对结果的评估）
         - 相关知识
             - RNA-seq的reads是跨外显子的（剔除内含子），所以不能用DNA测序所用的BWA、bowtie，它们它们假设 reads 来自于连续的 DNA 序列，不会考虑外显子与内含子的边界问题，无法识别剪接事件；
             - 常用的软件有star、hisat2（基于bowtie2）、tophat（基于bowtie，tophat2基于bowtie2）、subread；
@@ -310,6 +313,9 @@
                         - --genomeFastaFiles {reference_genome}：FASTA格式的参考基因组文件路径；
                         - --sjdbGTFfile {species.gff3|species.gtf}：用于基因注释的GTF文件（可选）
                         - --sjdbOverhang 149：剪接位点周围的读取长度.对于sjdbOverhang参数，一般为读取长度-1（或最大读取长度-1）。例如，如果您的读取长度为150，该值应为149。在大多数情况下，默认值100也有效。
+                    - 示例：
+                        - `"STAR --runMode genomeGenerate --runThreadN 40 --genomeDir /home/zhangyk/project/RNA_seq/Result/genome_index --genomeFastaFiles /home/zhangyk/project/RNA_seq/data/referdata/hg38.fa --sjdbGTFfile /home/zhangyk/project/RNA_seq/data/referdata/hg38.ncbiRefSeq.gtf`
+                        - `STAR --runMode genomeGenerate --genomeDir ~/reference/index/star/mm10 --genomeFastaFiles ~/reference/genome/mm10/mm10.fa --sjdbGTFfile ~/reference/gtf/gencode/gencode.vM12.annotation.gtf --sjdbOverhang 149 --runThreadN 4`
                 3. 使用star比对
                     - 主要命令：`STAR --runMode alignReads [options]... --genomeDir {index_folder} --readFilesIn R1.fq R2.fq`
                         - --runThreadN {int}:线程数
@@ -325,19 +331,35 @@
                         - --outSAMattributes All：要选ALL，不然下游软件会报错;
                         - --outFilterIntronMotifs RemoveNoncanonical：删除非典型，仅保留典型
                         - --quantMode GeneCounts:计数模式，按基因进行计数，使用htseq-count的默认参数进行计数。前提是指定了--sjdbGTFfile；如果后面要使用RSEM进行定量分析，可以再加一个TranscriptomeSAM；
+                    - 示例：`STAR --runThreadN 7 --runMode alignReads --readFilesCommand zcat --quantMode TranscriptomeSAM GeneCounts --twopassMode Basic --outSAMtype BAM Unsorted --outSAMunmapped None --genomeDir /home/zhangyk/project/RNA_seq/Result/genome_index/ --readFilesIn /home/zhangyk/project/RNA_seq/Result/trimmomatic_result/${j%_*_*}_R1_paired.fastq.gz /home/zhangyk/project/RNA_seq/Result/trimmomatic_result/${j%_*_*}_R2_paied.fastq.gz --outFileNamePrefix /home/zhangyk/project/RNA_seq/Result/star_result/STAR_${j%_*_*}` 
         - <a href="https://imgse.com/i/pEnG9KS"><img src="https://s21.ax1x.com/2025/02/10/pEnG9KS.png" alt="pEnG9KS.png" border="0"></a>
         - 使用Hisat2软件进行比对（效率高内存少，但输出结果仅为比对文件）
+        - 比对之后的结果评估
+            - 使用samtools flagstat对bam文件进行统计
+                - 主要命令：`ls *.bam | while read id; do (samtools flagstat -@ 10 $id $(basename ${id} ". bam").flagstat ); done`
+            - 对flagstat结果进行整合
+                - 使用awk命令:
+                    - `cat *| awk '{print $2}' | paste - - - - - - -`：-个数应该是样本个数吧
+                    - `cat *| awk '{print $1}' | paste - - - -- -`
+                - 使用multiqc也可以对目录下的flagstat的结果进行整合：直接使用`multiqc ./`；multiqc建议看一下官方文档；  
 4. 表达定量
     - 相关知识
         - FPKM、RPKM、TPM
     - 教程
-        - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
     - 处理原始比对文件的步骤
         - sam格式转bam格式
         - 对bam文件进行排序
         - 去除比对得分较低序列
         - 去除重复reads
     - 使用cufflinks软件进行表达量计算（老，不常用了，效率不高）
+        - 教程：
+            - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
+            - [github-cufflinks文档](https://github.com/cole-trapnell-lab/cufflinks/blob/master/doc/html/manual.html)
+            - [完整转录组RNAseq分析流程（tophat2+cufflink+cuffdiff）(有自己的代码，还算详细，)--2020-03](https://www.jianshu.com/p/0ab0e2aeca14)
+            - [转录组分析（四）tophat+cufflinks篇（有代码）-2022-09](https://zhuanlan.zhihu.com/p/561285944)
+            - [RiceENCODE-pipelin（比较粗略）](https://github.com/lxie-0709/RiceENCODE-pipeline/blob/main/RNA-seq.sh)
+            - [RNA-seq数据分析（二）——Cufflinks篇（作用不是很大）--2021-03](https://blog.51cto.com/u_15127592/2674975)
+            - [Cufflinks的使用(基本上只是官方文档的翻译--2021-06)](https://www.jianshu.com/p/82d6116fd0b8)
         - 简介与安装
             - 在使用tophat进行比对之后，你需要了解转录本的丰度，它首先将比对后的序列组装成转录本然后对转录本进行定量。
                 - Assembly（将短的reads组装成长的转录本）：比对结果包含所有序列在参考基因组的位置和match信息，转录本组装的第一步就是识别标记相互不兼容的片段，这些片段不能共存于同一个转录本中；第二步就是通过overlap来多个片段连接起来；第三步就是将前两个过程得到的片段信息整合，最终构建出每个转录本的不同异构体（isoforms）；
@@ -423,6 +445,7 @@
                     - 展现各个样本的每个重复的FPKM值，和上面一样也包含四个文件；
                 4. Differential expression tests
                     - 针对转录本或基因或cds在两两样本间的差异表达检验信息，包含log2(fold_change)、显著值等信息；同样包括四个以`_exp.diff`结尾的文件；
+                    - 这是一个相对来说比较重要的文件，可以用于筛选差异基因。以gene_exp.diff文件为例，分别包含Tested id、gene、locus、sample 1、sample 2、Test status（可以是OK，表示通过检验，可以是NOTEST，表示没有足够的alignment去检验；还可以是LOWDATA、HIDATA和FAIL）、FPKMx、FPKMy、log2(FPKMy/FPKMx)、test stat、p value、q value（FDR-adjusted p-value）、significant。
                 5. Differential splicing tests - splicing.diff
                     - 不同isoform之间的可变剪切检验，只有多个isoforms的primary transcripts才有这些信息；一般没用吧，可能在研究可变剪切中需要用到；
                 6. Differential coding output - cds.diff
@@ -435,7 +458,7 @@
             - cuffnorm主要命令：`cuffnorm -p 6 -L --library-type fr-unstranded --output-format cuffdiff -o ./Cuffnorm <transcripts.gtf> <sample1_replicate1.sam[,...,sample1_replicateM.sam]> <sample2_replicate1.sam[,...,sample2_replicateM.sam]>... [sampleN.sam_replicate1.sam[,...,sample2_replicateM.sam]]`
                 - 用于对表达值进行标准化，和cuffdiff的输入输出有点类似，不过它包含的是标准化后的fragment counts；
                 - 有和cuffdiff一样的-o、-L、-p、--library-type、--no-update-check参数，但是没有-b、-u等参数；
-                - cuffnorm不像cuffdiff进行差异表达分析；它的输出结果的格式和cuffdiff不一样，如果想要和cuffdiff一致，可以使用`--output-format cuffdiff`参数来指定输出结果；cuffnorm；它输出的标准化后的raw counts，所以后面想要进行下游的差异表达工具，必须是要能接受raw counts作为输入的工具；（DeSeq2应该是可以的吧）
+                - cuffnorm不像cuffdiff进行差异表达分析；它的输出结果的格式和cuffdiff不一样，如果想要和cuffdiff一致，可以使用`--output-format cuffdiff`参数来指定输出结果；cuffnorm；它输出的标准化后的raw counts，所以后面想要进行下游的差异表达工具，必须是要能接受raw counts作为输入的工具；（DeSeq2需要的是未标准化的）
                 - cuffdiff和cuffnorm都支持一个--use-sample-sheet参数，可以用来声明你的样本的label和对应的sam或bam文件的对应关系，感觉作用不大；
             - cuffnorm结果文件
                 1. Simple-table expression format：
@@ -444,29 +467,288 @@
                     - 以attr_table结尾、包含对应的基因或转录本或cds的metadata；
                 3. Simple-table sample attributes format
                     - 名为samples.table文件，包含样本的一些信息，无关紧要；
-   - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
-   1. 基因表达定量
-   2. 表达矩阵的标准化/normalization
-      - <a href="https://imgse.com/i/pEnGPbQ"><img src="https://s21.ax1x.com/2025/02/10/pEnGPbQ.png" alt="pEnGPbQ.png" border="0"></a> 
-      - <a href="https://imgse.com/i/pEnDw4O"><img src="https://s21.ax1x.com/2025/02/10/pEnDw4O.png" alt="pEnDw4O.png" border="0"></a>
-   3. 质控
-      - 样本过滤和基因过滤 
+            - cuffdiff和cuffnorm的结果文件比较
+                - cuffdiff的genes.count_tracking文件和cuffnorm的genes.count_table文件
+                    - 图片待插入 
+                    - 文件第一列两者都一样是tracking_id，但是genes.count_tracking对每一个样本的count值都包含四列，包括count、count_variance、count_uncertainty、status；而genes.count_table文件对于每一个样本的每一个重复的count都有数值，也就是说genes.count_tracking样本count值是将genes.count_table中每个样本的两个重复的count取均值得到的；
+                    - 这个counts是否可用呢？
+                        - 图片待插入 
+                        - 官方文档里表明这个不是raw counts，同样有回答表明Bowtie-Tophat-Cufflinks流程不会产生raw counts：
+                            - [Raw read count on Cuffdiff](https://www.biostars.org/p/136378/)
+                            - [Cufflinks bias correction and DESEq2](https://www.biostars.org/p/175665/)
+                - genes.fpkm_table和genes.fpkm_tracking
+                    - 图片待插入
+                - 能否从bowtie2+tophat2+cufflinks流程中获取到样本的raw counts？还有我自己提问的链接
+                    - 根据fpkm的计算公式
+                        - [Why cufflinks does not report raw read count anymore? Which version of it do report?](https://www.biostars.org/p/138084/#138216) ：不建议recompute the read counts from the FPKM values，since cufflinks does some length normalisations of the transcripts as well as assigning multi-mapping reads.，建议使用HTseq，也有建议使用featureCounts的； 
+                    - 使用htseq-count或者featureCounts计算raw reads
+                        - [Cufflink, where is the raw gene count?（biostars）](https://www.biostars.org/p/271203/)、[How do you extract raw counts from CUFFLINKS?](https://www.biostars.org/p/107635/)、[Raw read count on Cuffdiff](https://www.biostars.org/p/136378/)、[Raw Counts From Cufflinks Output](https://www.biostars.org/p/63590/)、[Cufflinks bias correction and DESEq2](https://www.biostars.org/p/175665/):：都建议用HTseq或featureCounts进行计算得到raw counts
+                        - https://www.seqanswers.com/forum/bioinformatics/bioinformatics-aa/4868-converting-fpkm-from-cufflinks-to-raw-counts-for-deseq 
+    - <a href="https://imgse.com/i/pEn8zgf"><img src="https://s21.ax1x.com/2025/02/10/pEn8zgf.png" alt="pEn8zgf.png" border="0"></a>
+   -  
+    1. 基因表达定量
+        - 使用HTSeq进行表达定量
+            - 教程
+                - [从NCBI下载数据后的处理7——HTseq比对，定量，生成count.txt文件-2023-08](https://mp.weixin.qq.com/s/F1hiYj5X1hStuWEpQdlj7A)
+                - [RNA-seq第四期——HTSeq-count对reads进行计数（包含结果的合并）-2022-09](https://mp.weixin.qq.com/s/BFmtOfu2lX1GCqlWscfLxw)
+                - [RNA-seq(6): reads计数，合并矩阵并进行注释（也包含结果的合并）-2018-08](https://www.jianshu.com/p/6d4cba26bb60)
+                - [转录组数据分析—HTseq定量(也包含合并，不过它为什么用limma包)--2022-10](https://www.jianshu.com/p/682916b324a6)
+                - [【转录组】RNA-seq分析htseq-count的使用(包含另外几个软件提取count_matrix的使用)--2018-07](https://www.cnblogs.com/triple-y/p/9338890.html)
+                - [转录组分析（二）Hisat2和DESeq2差异分析(未看)-2022-09](https://zhuanlan.zhihu.com/p/560995288)
+                - [RNA-Seq-workflow(未看)](https://sites.google.com/site/princetonhtseq/tutorials/rna-seq)
+            - 安装与简介
+                - HTSeq是一款针对有参转录组测序数据进行表达量分析的python包，需要有SAM和GTF文件作为输入文件；输入的gtf不能包含可变剪切信息，并且与sam的染色体名称保持一致；接受的bam或sam文件需要经过排序，可以用`samtools sort`进行排序；
+                - HTSeq需要python3.7以上的环境，以及不支持windows，因为其中的一个dependency——Pysam只在linux或osx有；使用`conda install bioconda::htseq -y`安装成功；
+            - 使用方法：
+                - 主要命令：`htseq-count -f bam -r name -s no -a 10 -t exon -i gene_id -m intersection-nonempty yourfile_name.bam ~/reference/hisat2_reference/Homo_sapiens.GRCh38.86.chr_patch_hapl_scaff.gtf > counts.txt`
+                    - -f {bam|sam}：指定输入文件的格式，默认是sam；
+                    - -r {name|pos}：设置所输入的sam或bam文件的排序方式，可以选择按read名或者pos按照参考基因组位置排序；双端测序数据必须指定，单端可忽略；默认按照read名。（好多教程句子前后都是矛盾的，而且教程对于参数都是抄来抄去，但是pypi的官方文档真的写的很垃圾，建议还是看其它英文教程或帮助文档）
+                    - -s {yes,no或reverse}：设置是否是链特异性测序，默认是yes；
+                    - -m {union|intersection-strict|intersection-nonempty}：对于原核生物，推荐使用intersection-strict模式；对于真核生物，推荐使用union模式。
+                    - -i：设置feature ID是由gtf/gff文件第9列哪个标签决定的；
+                    - -n：线程数，[htseq也能支持使用-n参数来指定线程了](https://evvail.com/2020/11/19/1950.html)
+                - 鉴定数据的建库方式（链特异性或链非特异性）
+                    - 教程：
+                        - [技能——如何判断测序数据是否是链特异性——2022-01](https://www.jianshu.com/p/109997345a67) 
+                        - [47--填坑—鉴定数据的建库方式（链特异性或非链特异性）【原创】](https://www.sxmu.edu.cn/bdcd/info/1109/1373.htm)
+                        - [RSeQC判断链特异性（strand-specific）](https://www.jianshu.com/p/4987dce4d165)
+                        - 后面两个不太重要：
+                            - [RSeQC的安装及操作流程](https://zhuanlan.zhihu.com/p/662280955)
+                            - [RSeQC使用笔记](https://www.bioinfo-scrounger.com/archives/234/)
+                    - 方法一：文献的method部分或数据下载界面看是否有提示
+                    - 方法二：使用igv
+                        - 比对完成后，将 bam 文件在 igv 上进行可视化，以单端测序为例，如果你发现测序的read方向总是与所在基因的方向一致或者总是相反，那么就是链特异性测序；反之，则不是。 
+                    - 方法三：使用RSeQC的infer_experiment.py工具
+                        1. 下载rseqc：
+                            - 直接使用conda安装成功，安装成功后实际上是多了一些脚本，而不是下载了这个软件，例如可以使用`infer_experiment.py -h`查看使用方法；
+                        2. 准备bed12文件
+                            - 使用rseqc的时候需要将注释文件gtf转换为bed12文件（有12列内容），可以使用UCSC 的 gtfToGenePred 和 genePredToBed 工具进行转换；
+                            - 教程：[RSeQC的安装及操作流程](https://zhuanlan.zhihu.com/p/662280955) [技能——gtf转为bed12](https://www.jianshu.com/p/de2455a8f507)
+                            1. 下载MH63RS2的gtf文件： https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-60/gtf/oryza_sativa_mh63/
+                            2. 下载UCSC 的 gtfToGenePred 和 genePredToBed 工具，都可以直接conda下载成功；
+                            3. 使用（非常简单）
+                                ```
+                                mkdir 11_rseqc && cd $_
+                                gtfToGenePred ../Oryza_sativa_mh63.MH63RS2.60.gtf Oryza_sativa_mh63.MH63RS2.60.genePred
+                                genePredToBed Oryza_sativa_mh63.MH63RS2.60.genePred Oryza_sativa_mh63.MH63RS2.60.bed
+                                ```
+                        3. 使用infer_experiment.py程序
+                            - 主要命令：`infer_experiment.py -i ../4_mapping_tophat/result_SRR10751892/accepted_hits.bam -r Oryza_sativa_mh63.MH63RS2.60.bed -q 20`
+                                - -i 比对生成的bam文件（可以不用排序）
+                                - -r gtf转bed12文件产生的bed文件。
+                                - -s 从所有的reads中抽取多少进行统计（默认200k）
+                                - -q unique map的mapq阈值
+                        4. 结果解读
+                            - 如果两个数值接近1:1，则为非链特异性，如果比例悬殊则为链特异性；“1+-，1-+，2++，2--”这，也就是read1在+链，相对的gene其实是在-链（reverse）。这种就是“fr-firststrand”相比于fr-secondstrand现在更为常见。
+                            - 图片待插入  
+    2. 表达矩阵的标准化/normalization
+        - <a href="https://imgse.com/i/pEnGPbQ"><img src="https://s21.ax1x.com/2025/02/10/pEnGPbQ.png" alt="pEnGPbQ.png" border="0"></a>
+        - <a href="https://imgse.com/i/pEnDw4O"><img src="https://s21.ax1x.com/2025/02/10/pEnDw4O.png" alt="pEnDw4O.png" border="0"></a>
+        - 根据htseq的结果count.txt生成可以用于DESeq2的表达矩阵文件
+            - 教程：
+                - [RNA-seq(6): reads计数，合并矩阵并进行注释](https://www.jianshu.com/p/6d4cba26bb60)
+                - [RNA-seq第四期——HTSeq-count对reads进行计数](https://mp.weixin.qq.com/s/BFmtOfu2lX1GCqlWscfLxw)
+            - 示例
+                ```
+                ## 导入包
+                library(biomaRt)
+                library(stringr)
+                ## 合并count矩阵
+                setwd("D:/AAA_codefile/stata_of_R/RNA-seq/")
+                mh63_yl0<-read.table("data/SRR10751892_counts.txt",sep = "\t",col.names = c("gene_id","mh63_yl0"))
+                mh63_yl1<-read.table("data/SRR10751893_counts.txt",sep = "\t",col.names = c("gene_id","mh63_yl1"))
+                mh63_pc0<-read.table("data/SRR10751894_counts.txt",sep = "\t",col.names = c("gene_id","mh63_pc0"))
+                mh63_pc1<-read.table("data/SRR10751895_counts.txt",sep = "\t",col.names = c("gene_id","mh63_pc1"))
+                tail(mh63_yl0)
+                raw_count <- merge(merge(mh63_yl0, mh63_yl1, by="gene_id"), merge(mh63_pc0, mh63_pc1, by="gene_id"))
+                raw_count_filt <- raw_count[-1:-5,] # 删除最后五行
+                ```  
+    3. 质控
+        - 样本过滤和基因过滤
 5. PCA和样本相关性分析
    - <a href="https://imgse.com/i/pEnGA5n"><img src="https://s21.ax1x.com/2025/02/10/pEnGA5n.png" alt="pEnGA5n.png" border="0"></a>
    - <a href="https://imgse.com/i/pEnGFEj"><img src="https://s21.ax1x.com/2025/02/10/pEnGFEj.png" alt="pEnGFEj.png" border="0"></a>
 6. 差异表达分析
-   1. 准备工作
-      - 软件：DESeq2
-   2. 筛选差异表达基因
-   3. 基因名称注释
-   4. 差异表达作图
-   - <a href="https://imgse.com/i/pEnGkUs"><img src="https://s21.ax1x.com/2025/02/10/pEnGkUs.png" alt="pEnGkUs.png" border="0"></a>
-   - <a href="https://imgse.com/i/pEnBQld"><img src="https://s21.ax1x.com/2025/02/10/pEnBQld.png" alt="pEnBQld.png" border="0" /></a>
-   - <a href="https://imgse.com/i/pEnGCDg"><img src="https://s21.ax1x.com/2025/02/10/pEnGCDg.png" alt="pEnGCDg.png" border="0"></a>
+    1. 准备工作
+       - 软件：DESeq2
+    2. 筛选差异表达基因
+        - 教程
+            - [一文掌握R包DESeq2的差异基因分析过程（还挺详细的）-2021-01](https://www.jianshu.com/p/b5541d695108) 
+            - [R语言DESeq2包做转录组RNAseq差异表达分析的一个简单小例子（视频）](https://www.bilibili.com/video/BV1HU4y157Cq/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+            - [Analyzing RNA-seq data with DESeq2（Bioconductor官方文档）-2025-02](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+            - [RNA-seq workflow: gene-level exploratory analysis and differential expression--作为上面的一个补充(没看)](https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html)
+            - [转录组分析 | DESeq2 差异表达分析（基本就是对官方文档的演绎）-2024-07](https://mp.weixin.qq.com/s/cXqG1T8PcK4VT0sx7dcRdA)
+            - [转录组分析（三）：DESeq2差异表达(未看)](https://mp.weixin.qq.com/s/fGZZuSPkBc2ZbUimHNimtQ)
+        - 使用DESeq2 R包进行筛选差异基因
+            - 简介与安装
+                - 转录组测序的最直接目的，就是设法寻找组间显著表达变化的基因，解释基因表达水平的变化对生物功能的影响。作为目前使用频率最高的鉴定差异分子的R包之一，一般可以在文献中得到它的阈值（log2(fold change)>=2、p<0.05）
+                - 如果下载好了BiocManager，直接输入`BiocManager::install('DESeq2')`即可安装；也可以用devtools从github上安装最新版本；
+            - 使用方法：
+                1. input data and pre-process
+                    1. characteristics of input data
+                        - DESeq2的输入文件是所有测序样本的基因表达矩阵的表格文件；该表格文件的列名为样本id或组别，行名为特征id（比如gene_id）、表格的值就是reads count；该表格文件的值均为整数值，不能是标准化的counts，因为DESeq2有自己的标准化流程；表格文件示例如下：
+                            - 图片 
+                        - 表达矩阵需要用DESeqDataSet对象进行存储
+                            - 使用read.delim函数读取表达矩阵，然后用data.frame转成dataframe类型（也可以用read.csv）；然后使用`DESeqDataSetFromMatrix`函数构建DESeqDataSet对象；
+                    2. pre-filtering
+                        - 去除掉一些表达特别低的基因/行；降低缓存压力，参考：设置为10；
+                            ```
+                            smallestGroupSize <- 3
+                            keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+                            dds <- dds[keep,]
+                            ``` 
+                    3. note on factor levels
+                        - 也就是给数据添加组别标签，可以用factor或relevel函数；也可以在后面使用results函数的时候指定；
+                    4. Collapsing technical replicates
+                        - DESeq2还提供一个函数去除技术性的重复片段；
+                2. 进行差异表达分析
+                    1. 标准的步骤被整合成一个DESeq()函数，然后使用results函数获得包含各基因的`log2 fold changes, p values and adjusted p values`的表格，用于后续的差异基因筛选；
+                    2. 筛选差异表达基因
+                        - 根据阈值（比如log2FC≥1以及padj<0.01）筛选，并通过“up”和“down”分别区分上、下调的基因。 
+                    3. 其它可用的
+                        - 加速和并行策略：使用DESeq函数可能因为样本过大导致运行缓慢，可以通过BiocParallel包使用多线程进行执行；
+                        - 有一个IHW包用于对DESeq2的p值进行检验；官方文档还提到什么效应量收缩；
+                3. 结果可视化以及文件输出
+                    1. 使用内置的绘图函数进行可视化和输出
+                        - 内置一个plotMA函数达到类似火山图的效果（针对log2 fold change）
+                            - 图片 
+                        - lfcShrink函数可以对log2 fold change进一步处理，使其更加方便排序和可视化；
+                        - 有一个plotCounts函数可以针对特定基因进行normalizes counts值的绘制；
+                            - 图片
+                        - 提供了一些包，能够对DESeq的结果进行输出成pdf、csv或html格式、以及完成plot的输出；  
+                    2. 使用ggplot2绘制火山图；
+        - 使用CummeRbund R包进行cuffdiff软件后续的分析
+            - 教程（还有官方的那篇paper）：
+                - [cummeRbund:用于Cufflinks高通量测序数据的可视化软件包（基本没用）-2017-09](https://mp.weixin.qq.com/s/m4sJE5B_O00ltab89ZV2Uw)
+                - [Pipeline RNA-seq-github(2017)](https://github.com/johanzi/RNA-seq_pipeline?tab=readme-ov-file#cufflinks-pipeline)
+                - [bioconductor](https://www.bioconductor.org/packages/release/bioc/html/cummeRbund.html)
+            - 安装与简介
+                - 是cuffdiff做RNA-seq的下游工具；CummeRbund创建了一个SQLite数据库，将cuffdiff运行产生的结果都存储到数据库中，将genes、transcripts、transcriptionstart sites、以及CDS建立关联。将这些数据存储到数据库中，并建立相关的索引，就可以很容易的对多个样本之间或者其他条件的数据进行查询检索，允许用户对于单个或者一组基因的各种feature进行比较分析。同时还提供了诸多的绘图函数，可以满足一般的数据可视化需要。
+                - 使用`BiocManager::install("cummeRbund")`进行安装；
+            - 使用方法
+                1. 使用readCufflinks函数读取目录下的cuffdiff结果：`cuffdiff_data <- readCufflinks('/dir/to/cuffdir_output_dir/')`
+                2. 筛选差异基因
+                    ```
+                    # Check for diff expressed genes
+                    gene_diff <- diffData(genes(cuffdiff_data))
+
+                    # Get DEGs based on default p-value threshold (5%)
+                    sig_gene_diff <- subset(gene_diff, (significant == 'yes'))
+
+                    # Get genes with significant differential expression based on chosen p-value threshold (1%)
+                    sig_gene_diff <- subset(gene_diff, (q_value < 0.01))
+
+                    # Get subset of genes based on fold-change (in this case, 4-fold change)
+                    sig_gene_diff <- subset(gene_diff, ( abs(log2_fold_change) > 2 & significant == 'yes'))
+                    ```
+                3. Extract information about DEGs
+                    ```
+                    # Check number of DEGs
+                    nrow(sig_gene_diff)
+
+                    # Get names of the DEGs
+                    name_sig_gene_diff =  getGenes(cuffdiff_data, sig_gene_diff$gene_id)
+                    list_genes = featureNames(name_sig_gene_diff)
+
+                    # Export table with names of the genes
+                    write.table(list_genes[2], 'list_genes.txt', sep='\t',row.names = F, col.names = T, quote = F)
+                    ```
+                4. Create a heat-map of the genes
+                    ```
+                    csHeatmap(sig_gene_diff, cluster='both')
+
+                    # Export as pdf
+                    pdf("sig_gene_diff.pdf", family="Helvetica", width=7, height=7)
+                    csHeatmap(name_genes_mpi, cluster='both')
+                    dev.off()
+                    ```
+                5. Compare the expression of each gene in two conditions with a scatter plot
+                    ```
+                    csScatter(genes(cuffdiff_data), 'tissue1', 'tissue2')
+
+                    # Scatterplot only for DEGs
+                    csScatter(sig_gene_diff, 'tissue1', 'tissue2') 
+                    ``` 
+                6. Make a volcano plot with a red highlight on significant DEGs (p-value<5%)
+                    ```
+                    csVolcanoMatrix(genes(cuffdiff_data))
+                    ```
+                7. Get density plot showing the distribution of the RNA-seq read counts (fpkm)
+                    ```
+                    # All genes
+                    csDensity(genes(cuffdiff_data))
+
+                    # Only DEGs
+                    csDensity(sig_gene_diff)
+                    ```
+                8. Get expression plots of a set of genes of interest
+                    ```
+                    gene_of_interest <- getGene(cuffdiff_data,'name_genes')
+                    expressionBarplot(gene_of_interest)
+
+                    # Use a vector if multiple genes
+                    genes_of_interest_IDs <- c("gene1","gene2","gene3")
+                    genes_of_interest <- getGene(cuffdiff_data, genes_of_interest_IDs)
+                    expressionBarplot(genes_of_interest)
+                    ```
+                9. Check clustering of biological replicates
+                    `csDendro(genes(cuffdiff_data), replicates=T)` 
+    3. 基因名称注释
+    4. 差异表达作图
+    - <a href="https://imgse.com/i/pEnGkUs"><img src="https://s21.ax1x.com/2025/02/10/pEnGkUs.png" alt="pEnGkUs.png" border="0"></a>
+    - <a href="https://imgse.com/i/pEnBQld"><img src="https://s21.ax1x.com/2025/02/10/pEnBQld.png" alt="pEnBQld.png" border="0" /></a>
+    - <a href="https://imgse.com/i/pEnGCDg"><img src="https://s21.ax1x.com/2025/02/10/pEnGCDg.png" alt="pEnGCDg.png" border="0"></a>
 7. 富集分析
-   1. KEGG富集
-   2. GO富集
-   3. reactome富集
+    - 教程
+        - [常规富集分析的原理解析](https://mp.weixin.qq.com/s/DqP0Qfpd0VZaJzje8XOQYA)
+        - [KEGG富集分析](https://www.bilibili.com/video/BV15MR8YHEM9/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+    - 富集分析背景知识
+        - 在RNA-seq中，拿到差异基因后，通常希望想要知道这些能够表征样本间差异的基因都参与了什么通路？哪些通路是重要的？从而推出样本间重要的功能差异，将研究上升到功能机制层面且利于后续机制实验的开展。“功能富集分析”可理解为在差异基因集中寻找占比高的功能，从而了解差异基因集的关键功能，进而推出样本间重要的功能差异。
+        - 富集分析过程
+            1. 选择基因注释数据库
+                - gene function是一个十分广泛的概念，不同的研究者有不同的定义和关注点，不同数据库也基于不同的分类思想对基因进行归类：
+                    - GO数据库分别从分子功能（Molecular Function，MF）、细胞组分（Cell Component，CC）和生物学过程（Biological Process，BP）三个层面对基因的功能进行注释；KEGG数据库、Reactome Pathway数据库、WikiPathways数据库对基因参与的通路进行注释；DO数据库对基因参与的人类疾病进行注释；MSigDB数据库对人和小鼠的基因进行了多角度的全面注释。
+                - 因此，首先我们需要根据研究目的，选择合适的数据库对差异基因进行功能归类，并统计每一条目的数据如表：
+                    - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250310153253.png"/>
+            2. 统计分析
+                - 如何定义富集？
+                    - “富集”指的是一个给定的生物学过程、通路或功能在前景基因集中出现的频率显著高于其在背景基因集中出现的频率，即：若m/n > M/N，认为条目A在前景基因集中富集。这就像从一大筐球中摸出n个球，若得到A类球的比例大于原先筐中A类球的比例，则认为A类球在摸出的n个球中富集，因此常规的富集分析问题符合超几何分布。
+                - 如何判断这种富集不是偶然的（富集显著）？
+                    - 换句话说，条目A的富集是否是偶然的？这需要进行超几何检验来计算显著性。计算从M个背景基因中随机选择n个基因，其中至少有m个基因属于条目A的概率：
+                        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/145d0b650ff74cb6b35e1fba9b89e180.png"/>
+                    - 若p-value≤0.05，说明从背景基因中随机选择n个基因，至少有m个基因属于条目A的概率极小，但是现实情况却发生了，则认为条目A显著富集。由于数据库中包含上百个条目，每个条目都要做一次检验，每次检验都有5%的概率是假阳性，随着检验次数增多，假阳性结果出现的次数就会增多，为了控制阳性结果中的错误率（False Discovery Rate，FDR），需要进行多重假设检验校正。
+                    - 举个例子，对300条通路进行了300次检验，即使他们实际上都不富集，也会出现15条通路富集的结果。若对300条通路进行300次检验，得到30条通路富集，其中有15条是假阳性结果，那么FDR=15/30=0.5，也就是说你获得的结果有一半是不可信的，因此要对p-value进行校正来将FDR控制在一定范围内。最常用的是BH（Benjaminiand Hochberg）法校正，最终我们应该使用校正后的p值（p.adjust）来筛选富集的条目。  
+                - 如何比较两个条目的富集程度？
+                    - 富集程度可以通过富集因子（rich factor）即m/M，注释到此条目上的差异基因数m和p.adjust这三个指标来衡量。一般情况下。我们直观地认为m越大，该条目越重要，但就像人均GDP比GDP更能代表生活水平一样，研究者提出了对条目大小进行标准化的富集因子作为衡量指标之一。
+                    - 以上描述的就是常规的GO和KEGG富集分析所采用的过度代表性分析（Over Representation Analysis，ORA）原理。总结为首先使用特定阈值创建输入列表（差异基因集），然后对输入列表进行功能归类和条目计数，最后采用超几何检验和多重假设检验校正计算富集的显著性。 
+    1. KEGG富集
+        - 使用实例
+            - 先准备一个id.txt文件，参考如下：
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250310160703.png"/>
+            - 代码：
+            ```
+            library("clusterProfiler")
+            library("org.Hs.eg.db") # 人的基因ID转换包
+            library("enrichplot")
+            library("ggplot2")
+            setwd("your_path")
+            rt=read.table("id.txt", sep="\t", header=T, check.names=F)
+            rt=rt[is.na(rt[,"entrezID"])==F,] # 剔除NA值
+            gene=rt$entrezID
+            # kegg富集分析
+            kk <- enrichKEGG(gene=gene，organism= "hsa"，pvalueCutoff = 0.05，qvalueCutoff = 0.05)
+            write.table(kk, file="KEGG.txt", sep="\t", quote=F, row.names=F)
+            # 柱状图
+            pdf(file="barplot.pdf", width=10, height=7)
+            barplot(kk, drop=TRUE, showCategory= 30)
+            dev.off()
+            # 气泡图
+            pdf(file="bubble.pdf", width=10, height= 7)
+            dotplot(kk.showCategory=30)
+            dev.off()
+            ```  
+    2. GO富集
+    3. reactome富集
 ## 四、RNA-seq实验设计
 ### 相关问题
 1. 转录组分析是测序深度重要还是生物学重复重要？
@@ -477,3 +759,170 @@
     - （1）如果筛选的差异基因很少，当你的实验设计多于两个condition时，就会产生一定的问题。
     - （2）用更严格的分析方法如，DESeq、edgeR、sleuth等；
     - （3）差异倍数较大的基因（FC>4）被遗漏的风险较小。 
+### 补充知识
+1. IGV使用
+    - 教程
+        - [](https://mp.weixin.qq.com/s/mRE65voGQTW-wVs5H43n2w)
+        - [](https://mp.weixin.qq.com/s/znEaMZqfrLAc6vAsqtbBzw)
+    - 安装与简介
+        - IGV是一个将基因组学数据可视化的可交互工具，可用于展示和查看基因表达、突变、融合、甲基化、探针等多种信息。
+        - [IGV 安装](https://mp.weixin.qq.com/s/JUcjo1BCyZc2dnsYw4aXTA)
+    - 使用IGV查看下机数据比对到基因组的bam文件
+        1. 导入参考基因组文件：点击Genomes进行load，导入成功后，会生成一个.fai的文件；
+        2. 导入bam文件
+            - 这里使用到的bam文件必须是排过序的；`*.bam`所在文件夹下要有对应的`*.bai`文件，可以使用samtools工具或者IGV中的igvtools工具生成bai文件；在这里我们使用igvtools生成bai文件： 
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250306104117.png"/>
+            - 一个bam文件加载后，会有三个tracks：coverage、junction（剪接）和比对情况：
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250306105950.png"/>
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250306110654.png"/>
+                - 【覆盖度】tracks，展示reads在基因组每个位置的分布情况，默认灰色。当某变异位点的碱基类型与参考序列不一致超过20%时，会根据碱基类型和数目进行着色；一般来说，几乎都是灰色的；
+                - 【剪接连接】tracks，展示junction情况和正负链分布情况。红色为比对到正链，蓝色为比对到负链。
+                - 【比对情况】tracks，展示变异情况。如纯合或杂合突变、indel等；IGV 表示相对于参考基因组的插入，使用紫色表示插入；IGV 用黑色线条表示相对于参考基因组的缺失；
+        3. 同时导入多个测序文件(bam文件)进行展示
+            - 可以点击左侧，将所有样本选择只显示coverage，然后拖动样本放在一起，使它们的coverage tracks紧挨在一起；
+2. 基因ID转换
+    - 教程
+        - [关于基因ID转换，一文就够了](https://mp.weixin.qq.com/s/S7sf2okHP0cf7_SiV7SjMg)
+    - 常见的基因iD
+        - gene symbol或者说gene name：Gene symbol也分为官方的基因名和亚名，通俗点来说，就是大名（Official）和小名（亚名）。Official gene symbol可以做基因ID转换和富集分析，以及多个数据集的整合分析，基因亚名可以让年纪大一点/不懂生信的审稿人认出他们熟悉的基因名字，比如提到PTPRC，一般人不知道这个是CD45。
+        - Gene ID，即Entrez ID：指的是来自于NCBI旗下的Entrez gene数据库所使用的编号，其实就是来自于NCBI里面的gene数据库。每个基因的编号具有唯一性，包括不同种属生物间的同源基因编号也不相同。
+        - Ensemble ID，相对于NCBI的Entrez ID，Ensembl是另外一个记录基因信息的数据库。不管是什么类型的，Ensemble ID的前三个开头都是以ENS开头的（ENSG是基因，ENST是转录本）；
+        - 除此之外，还有NCBI的refseq ID，常用于在NCBI数据库获取基因序列，比如引物设计，质粒构建。
+    - 同一种属的基因ID转换
+        1. 如果是人、小鼠等比较常见的物种（一般都是动物，没有水稻等职务）的基因ID的转换，可以使用类似于`org.Hs.eg.db`（人的）的一系列包进行转换，里面内置了对应物种的各种ID；
+            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307163003.png"/>
+            - 参考代码
+                    ```
+                    data = openxlsx::read.xlsx("./GSE10072_expression_clinical_data_1.xlsx",
+                              sheet = 1,rowNames = T)
+                    ## 加载R包
+                    library(clusterProfiler)
+                    library(org.Hs.eg.db) #for Human
+                    library(org.Mm.eg.db) #for Mouse
+                    keytypes(org.Hs.eg.db)
+                    keytypes(org.Mm.eg.db)
+                    gene.df <- bitr(row.names(data), fromType = "SYMBOL", # 从SYMBOL到ENSEMBL和ENTREZID,得到新命名的gene.df
+                                   toType = c("ENSEMBL","ENTREZID"),
+                                   OrgDb = org.Hs.eg.db) #小鼠换成org.Mm.eg.db
+                    head(gene.df)
+                    ``` 
+        2. 使用biomaRt包
+            - biomaRt包是从网页上加载注释的，网络不好的话比较慢，可以先将常使用的物种保存下来，每次使用的时候load一下即可。
+            - 参考代码：
+                ```
+                    ## 加载R包
+                    library(clusterProfiler)
+                    library(biomaRt)
+
+                    human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                    mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+                    human_list = listFilters(human)
+                    mouse_list = listFilters(mouse)
+                    save(human,mouse,file = "./biomaRt_ensembl_annotation.Rdata")
+                    rm(list())
+                    load(file = "./biomaRt_ensembl_annotation.Rdata")
+                    head(human_list)
+                    head(mouse_list)
+
+                    ## 开始进行ID转换
+                    data = openxlsx::read.xlsx("./GSE10072_expression_clinical_data_1.xlsx",sheet = 1,rowNames = T)
+                    gene.df <- bitr(row.names(data), fromType = "hgnc_symbol",
+                                   toType = c("ensembl_gene_id","entrezgene_id"),
+                                   OrgDb = human) #小鼠换成mouse
+                    head(gene.df)
+                ```
+            - 
+    - 不同种属的基因ID转换
+        - 使用biomaRt包
+            - 参考代码
+                ```
+                    ## 加载储存好的注释文件
+                    load(file = "./biomaRt_ensembl_annotation.Rdata")
+
+                    # Basic function to convert mouse to human gene names
+                    convertMouseGeneList <- function(x = x){
+                     require("biomaRt")
+                     #human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                     #mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+                     genesV2 = getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values = x , mart = mouse, attributesL = c("hgnc_symbol"), martL = human, uniqueRows=T)
+                     humanx <- unique(genesV2[, 2])
+                     # Print the first 6 genes found to the screen
+                     print(head(humanx))
+                     return(humanx)
+                    }
+
+                    # Basic function to convert human to mouse gene names
+                    convertHumanGeneList <- function(x){
+                     require("biomaRt")
+                     #human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                     #mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+                     genesV2 = getLDS(attributes = c("hgnc_symbol"), filters = "hgnc_symbol", values = x , mart = human, attributesL = c("mgi_symbol"), martL = mouse, uniqueRows=T)
+                     humanx <- unique(genesV2[, 2])
+                     # Print the first 6 genes found to the screen
+                     print(head(humanx))
+                     return(humanx)
+                    }
+
+                    ## 例如，Human转mouse
+                    data = openxlsx::read.xlsx("./GSE10072_expression_clinical_data_1.xlsx",
+                                              sheet = 1,rowNames = T)
+                    mus_genes <- convertHumanGeneList(row.names(data))
+                ```
+        - 一些相应物种的数据库可以提供ID转换
+            - RIGW数据库，[Rice Information GateWay](http://rice.hzau.edu.cn/rice_rs3/)
+                - 使用ZS97和MH63为参考基因组，能提供ZS97、MH63、9311和日本晴之间的直系同源基因ID的转换，并提供KEGG和GO富集工具。
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>
+    - 使用biomaRt包进行基因ID注释
+        - 教程：
+            - [R语言biomaRt包基础使用方法](https://mp.weixin.qq.com/s/7vvxZomAYidrGXkfqQ4Zwg) 
+        - 安装与简介
+            - 使用BiocManager安装；
+            - biomaRt包可以轻松获取Ensembl上的数据，可以在各种基因名和不同的基因ID之间进行转换，也可以根据基因的ID获取基因的序列，还可以获取GO注释，SNPs的信息；
+        -  基本使用：
+            1. 选择你需要的database：
+                - 这一步就是选择BioMart要链接到的数据库； 
+                - BioMart database与Ensembl database的关系：
+                    - BioMart是一个更广泛的数据查询平台/工具，它可以访问多个生物学数据库，如Ensembl、Uniprot、WormBase；而Ensembl只是其中一个数据库，仅包含 Ensembl 提供的基因、变异、调控数据；
+                    - useEnsembl()直接连接到 Ensembl BioMart 数据库，只适用于Ensembl database，用户不需要手动指定 URL，相关函数有`listEnsembl() listEnsemblGenomes()`；而useMart()可以连接 BioMart 平台中的任意数据库，适用于所有 BioMart 提供的数据库，可以使用`listMarts()`进行所支持的数据库列表查询；
+                    - 代码展示：
+                        ```
+                            # 连接 Ensembl 基因数据库
+                            ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+
+                            # 查看可用数据集
+                            listDatasets(ensembl)
+                        ```
+                        ```
+                            # 列出 BioMart 平台所有可用的数据库
+                            listMarts()
+
+                            # 连接 Ensembl BioMart
+                            ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
+
+                            # 查看可用数据集
+                            listDatasets(ensembl)
+                        ```
+                - 
+            2. 选择dataset/指定物种
+                - 每个物种就是一个dataset，`listDatasets()`可以展示有哪些dataset是可选的，但你可能很难从中找到你需要的。`searchDatasets()`提供了一个搜索功能，你可以检索你需要的物种，这里以人种为例，搜索hsapiens；
+                - 代码示例：
+                    ```
+                        datasets <- listDatasets(ensembl)
+                        head(datasets)
+                        searchDatasets(mart = ensembl, pattern = "hsapiens")
+                    ```
+                - 知道要用的dataset后，接下来使用useDataset()来更新Mart对象：`ensembl <- useDataset(dataset = "hsapiens_gene_ensembl", mart = ensembl)`
+            3. 选择镜像
+                - 可以选择离你最近的镜像地址来加速数据的获取，镜像包括：useast, uswest, asia, www：`ensembl <- useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl", mirror = "useast")`
+            4. 选择Ensembl的版本
+                - listEnsemblArchives()可以显示可选的Ensembl版本;
+                - 代码示例：
+                    ```
+                        listEnsemblArchives()
+                        listEnsembl(version = 95) # 选择指定的Ensembl版本
+                        ensembl95 <- useEnsembl(biomart = 'genes', dataset = 'hsapiens_gene_ensembl', version = 95)
+                    ```
+            5. 使用getBM函数进行检索(根据attributes值的选择完成ID转换)
+                - 上面相当于构建了一个数据库，里面包含了所有的数据，下面需要制定你的检索条件，该函数主要包含三个参数：
+                    - filters和values这两个参数定义你检索的条件，比如想检索位于X染色体上所有的基因，则你的filters为"chromosome_name",value参数为"X"
+                    - attributes：指定返回的结果都包含哪些信息，比如entrezgene_id；可以使用`attributes = listAttributes(ensembl);attributes[1:5,]`查看可以获取的Attributes。

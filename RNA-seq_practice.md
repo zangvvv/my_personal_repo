@@ -32,7 +32,8 @@
     - 使用find ~/anaconda3/ -name *TruSeq3-PE*可以查看到trimmomatic自带的Illumina接头序列
         - <a href="https://imgse.com/i/pEQcKXT"><img src="https://s21.ax1x.com/2025/02/20/pEQcKXT.png" alt="pEQcKXT.png" border="0"></a> 
         - <a href="https://imgse.com/i/pEQcucV"><img src="https://s21.ax1x.com/2025/02/20/pEQcucV.png" alt="pEQcucV.png" border="0"></a>
-        - <a href="https://imgse.com/i/pEQcQnU"><img src="https://s21.ax1x.com/2025/02/20/pEQcQnU.png" alt="pEQcQnU.png" border="0"></a>  
+        - <a href="https://imgse.com/i/pEQcQnU"><img src="https://s21.ax1x.com/2025/02/20/pEQcQnU.png" alt="pEQcQnU.png" border="0"></a> 
+        - <a href="https://imgse.com/i/pEQcQnU"><img src="https://s21.ax1x.com/2025/02/20/pEQcQnU.png" alt="pEQcQnU.png" border="0"></a> 
 参考张一柯设置的参数，单个序列的代码为：`trimmomatic PE -phred33 SRR10751892_1.fastq SRR10751892_2.fastq ./tmp_trim/SRR_92_r1.clean.fq.gz ./tmp_trim/SRR_92_r1.unpaired.fq.gz ./tmp_trim/SRR_92_r2.clean.fq.gz ./tmp_trim/SRR_92_r2.unpaired.fq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 -threads 12 MINLEN:36`
 ## 四、建立基因组索引
 已经确认下载的基因组文件和gff文件所用的染色体序号一致；然后将基因组的fa文件和所建立的索引放在一个目录下；
@@ -60,17 +61,32 @@
    ``` 
 接着（单样本的）mapping， `tophat2 -p 8 -o ./4_mapping_tophat --transcriptome-index=MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60.tr MH63_genome_index/Oryza_sativa_mh63.MH63RS2.60 tmp_trim/SRR_92_r1.clean.fq.gz tmp_trim/SRR_92_r2.clean.fq.gz` 成功！耗时52分钟
 ## 六、表达定量
+### 使用cufflinks进行定量
 转录本组装：（批量的写在脚本里）
 `cufflinks -o 5_cufflinks/ -p 12 -g Oryza_sativa_mh63.MH63RS2.60.gff3 --library-type fr-unstranded 4_mapping_tophat/accepted_hits.bam` 耗时35分钟，中间有过暂停很久不动的情况。
 转录本比较：(批量的写在脚本里，但由于运行很快，所以直接在compute01中运行了)
 `cuffcompare -r Oryza_sativa_mh63.MH63RS2.60.gff3 -o tmp_cuffcompare/SRR10751892 tmp_cufflinks/transcripts.gtf`
-整合转录本：也很快（5分钟不到），直接运行，单样本的做不了就不用做了
+整合转录本：也很快（5分钟不到），直接运行，单样本的做不了整合就不用做了
 `cuffmerge -o 7_cuffmerge/ -g Oryza_sativa_mh63.MH63RS2.60.gff3 -p 16 assembly_list.txt `
 结果是一个merged.gtf文件和一个logs目录；
 转录本定量：（批量的写在脚本里，耗时大概2个多小时）
 `cuffquant -o tmp_cuffquant/ -p 16 -u --library-type fr-unstranded Oryza_sativa_mh63.MH63RS2.60.gff3 tmp_mapping_2/accepted_hits.bam`，单样本的大概十几分钟吧
+### 使用htseq进行表达定量
+tophat2输出的bam文件是根据基因组位置排序而不是根据reads name进行排序的，当然HTseq对于根据根据pos或者是name都可以进行表达定量；参见 https://www.biostars.org/p/150604/ ；并且使用samtools view accepted_hits.bam | less -SN 查看了也确实是按照pos进行排序的；
+1. 使用htseq产生raw counts的数据：（批量的写成sh脚本了）
+`htseq-count -f bam -r pos -s yes -i gene_id 4_mapping_tophat/result_SRR10751892/accepted_hits.bam Oryza_sativa_mh63.MH63RS2.60.gtf > tmp_htseq/tmp_counts_gtf.txt` 或 `htseq-count -f bam -r pos -s yes -i gene_id -t gene 4_mapping_tophat/result_SRR10751892/accepted_hits.bam Oryza_sativa_mh63.MH63RS2.60.gff3 > tmp_htseq/tmp_counts.txt`，一个样本半个小时；
+2. 报错处理
+    - 报错信息
+        - 使用gff文件作为输入发生报错`Error processing GFF file (line 23 of file Oryza_sativa_mh63.MH63RS2.60.gff3):Feature transcript:OsMH63_01G000010_01 does not contain a 'gene_id' attribut [Exception type: ValueError, raised in features.py:329]`
+        - 而使用gtf的时候虽然提示`[E::idx_find_and_load] Could not retrieve index file for '4_mapping_tophat/res10751892/accepted_hits.bam'`，但是最终是有结果的；
+    - 报错分析
+        - gtf文件主要是基因文件，所以每一个feature，不管是cds还是exon，都在第九列有一个gene_id值，但是gff文件的话只有feature是gene的才在第九列有一个gene_id值；
+        - 所以如果想要使用gff文件，理论上可以指定-t参数为gene（注释文件第三列，即feature_type），则文件只针对它进行表达量计算；或者将-i参数的值改成Parent，只不过计算的就是transcript_ID了；但是一般来说，我们都是最后要定量的对象都是gene（不管是别人的实例，以及我们一般关注的都是gene）；
+        - 所以尝试采用上面第一种方法去指定-t参数为gene，结果显示正常；并且无论是gtf还是gff作为输入，最终结果都是一样的：
+            - 图片待插入
+与之前用gtf文件作为输入的结果进行比较：结果表示大体上是一样的，所以说都是对基因进行定量。
 ### 差异表达分析cuffdiff
-1. 首先获取SRR编号与样本及重复数对应关系
+1. 首先获取SRR编号与样本（如MH63 root）及重复数对应关系
     - 因为之前所有的结果都是以SRR样本号进行标记的，而进行差异表达分析的时候需要对样本进行分组，所以首先去sra数据下载地址，下载到所选样本的metadata文件（csv格式，本文所有样本重复数为2）
     - 复制run和source_name两列内容保存到一个metadata.txt文件中；
 2. 执行cuffdiff
@@ -83,5 +99,9 @@
 `cuffnorm -o tmp_cuffnorm/ -p 16 -L MH63_yf,MH63_pc,MH63_rt --no-update-check 7_cuffmerge/merged.gtf 8_cuffquant/quant_SRR10751892/abundances.cxb,8_cuffquant/quant_SRR10751893/abundances.cxb 8_cuffquant/quant_SRR10751894/abundances.cxb,8_cuffquant/quant_SRR10751895/abundances.cxb 8_cuffquant/quant_SRR10751896/abundances.cxb,8_cuffquant/quant_SRR10751897/abundances.cxb`
 ## 张一柯
 fastqc、trimmomatic质控，star比对，用subread的featureCounts;
-
-
+## 临时
+### bash命令补充
+1. `ls ../clean/*gz | while read fwelkjfewk; do (zcat $fwelkjfewk | head -1000); done`
+对 ../clean/ 目录下所有 .gz 文件执行 zcat（解压并输出内容），然后取每个文件的前 1000 行进行显示；其中`while read 变量名` 逐行读取 ls 的输出，并把文件名赋值给变量`fwelkjfewk`;
+或者使用`for file in ../clean/*gz; do zcat "$file" | head -1000; done`也可以；
+1. bash中的dirname、basename就是python中的Path模块的内容，一个取目录，一个取文件名；

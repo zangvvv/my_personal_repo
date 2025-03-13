@@ -17,11 +17,11 @@
 2. 创建bucket
     - 进入管理控制台——创建bucket：自定义{bucket_name}，地域选择最近的，读写权限设置为公共读；
         - bucket_name设置为`zangvvv-img`；
-        - 地域为南京
-        - 读写为私有， 
+        - 地域为南京；
+        - 读写为私有；  
 3. 创建个人key
     - 点击进入bucket列表，点击自己的bucket名称，新建自己要用来做图床的目录——点击概览，复制节点域名{oss开头}——鼠标放到右上角个人账户，点击"AccessKey管理"——先点击继续使用AccessKey，然后再点击创建AccessKey——创建完成后，复制AccessKey ID和AccessKey Secret；
-        - 新建目录为`figure_bed` 
+        - bucket_name为`zangvvv-img`，新建目录为`figure_bed`
         - 节点域名为`oss-cn-nanjing.aliyuncs.com`
     - 现在不建议开通个人key 
 4. 下载picgo和图床配置
@@ -32,6 +32,14 @@
         - 设定存储空间名就是之前的{bucket_name}
         - 确认存储区域就是之前的{ossxx}
         - 存储路径为之前新建目录名、然后点击确定，设置为默认图床
-但是说阿里云有被流量盗刷的风险，但是我的md不准备发布（至少读研期间不会发布），所以应该就没事吧（虽然不发布，只要上云就是可爬取的）
+但是说阿里云有被流量盗刷的风险，但是我的md不准备发布（至少读研期间不会发布），所以应该就没事吧（最新虽然不发布，只要上云就是可爬取的）
 ## 附加内容--Cloudflare
 免费空间和流量，但是首先需要有信用卡或者是一个国区的paypal账号用于添加付费计划，同时你还需要一个域名，所以暂时就不搞了[用Cloudflare R2 + PicGo，搭建最佳个人图床！免费、稳定、国内/国外都能访问](https://www.bilibili.com/video/BV1eZCrY4E17/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+
+<img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250303093853.png"/>
+<a href="https://imgse.com/i/pEQcKXT">
+    <img src="https://s21.ax1x.com/2025/02/20/pEQcKXT.png" alt="pEQcKXT.png" border="0">
+</a>
+![](https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250303093853.png)
+<img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250303093853.png" width="300" height="200"/>
+
