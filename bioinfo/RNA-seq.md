@@ -874,7 +874,9 @@
                 - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>
     - 使用biomaRt包进行基因ID注释
         - 教程：
-            - [R语言biomaRt包基础使用方法](https://mp.weixin.qq.com/s/7vvxZomAYidrGXkfqQ4Zwg) 
+            - [R语言biomaRt包基础使用方法](https://mp.weixin.qq.com/s/7vvxZomAYidrGXkfqQ4Zwg)
+            - [Ensemble官网BioMart及R语言biomaRt包获取人鼠同源基因(可以直接获取到对应的ID)](https://zhuanlan.zhihu.com/p/593447503)
+            - [未看（因为Ensembl和Ensembl plants不是一个数据库，可能要指定host参数](https://mp.weixin.qq.com/s/6njSl2nFqQKLMxF0X_PYJA)
         - 安装与简介
             - 使用BiocManager安装；
             - biomaRt包可以轻松获取Ensembl上的数据，可以在各种基因名和不同的基因ID之间进行转换，也可以根据基因的ID获取基因的序列，还可以获取GO注释，SNPs的信息；
