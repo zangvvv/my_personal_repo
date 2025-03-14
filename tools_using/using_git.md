@@ -112,7 +112,7 @@
     3. 在B电脑上修改代码后推送到github；
          - 先`ssh -T git@github.com`到github，然后`git add .`（或某个文件）和`git commit -m "final_test"`将文件或项目提交仓库，然后`git push -u origin main -f`到github就行；
          - <a href="https://imgse.com/i/pEmA9sK"><img src="https://s21.ax1x.com/2025/02/07/pEmA9sK.png" alt="pEmA9sK.png" border="0" width="60%" height="70%"/></a> 
-    4. 在A电脑上只需`git pull origin main`就可以更新到最新的代码；（同理在A上修改后推送到github，在B上也是pull一下更新到最新的代码即可）
+    4. 在A电脑上只需`git pull origin main -f`就可以更新到最新的代码；（同理在A上修改后推送到github，在B上也是pull一下更新到最新的代码即可）
 - 报错大赏
     - 报错：`error: src refspec main does not match any`
         - 本地仓库用的是master分支，而远程的github默认是main分支；可以使用`git branch`查看，然后使用`git checkout -b main`将本地仓库的branch设置为main分支；然后重新尝试推送即可。（建议直接使用`git init -b main`）

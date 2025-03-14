@@ -747,7 +747,21 @@
             dotplot(kk.showCategory=30)
             dev.off()
             ```  
+        - 使用clusterprofiler进行富集分析
+            - 进行富集分析有很多在线工具，但是 
     2. GO富集
+        - 使用clusterprofiler进行GO注释
+            - 教程：
+                - [水稻（Oryza sativa）如何批量地做GO富集分析](https://mp.weixin.qq.com/s/Q6HeR6fJSEE3NB1JYWqZtA)  
+            1. 准备R包
+                - openxlsx、tidyverse、argparser、clusterProfiler；
+                - 以及一个org.Osativa.eg.db包（这个是砷在氟中作者自己写的，已经保存在百度网盘），需要用`library(org.Osativa.eg.db, lib = 'path2org.Osativa.eg.db')`指定一下；
+            2. 建立进行GO富集分析的基因集文件
+                - 要将基因列表的excel文件放在名为"original_file"的文件夹，注意读入的excel文件的基因ID是“LOC_Os02g43410”这种形式的基因ID，而且列名为gene_id；一个基因集放在一个excel中，可以放入不止一个excel文件在这个文件夹中；
+                - [水稻的RAP MSU ID转换](https://zhuanlan.zhihu.com/p/700364719)
+            3. 建立名为table和plot的文件夹，用于GO富集结果的存储
+            4. 下载Osativa_GO_enrichment.R脚本
+            5. 
     3. reactome富集
 ## 四、RNA-seq实验设计
 ### 相关问题
@@ -762,8 +776,10 @@
 ### 补充知识
 1. IGV使用
     - 教程
-        - [](https://mp.weixin.qq.com/s/mRE65voGQTW-wVs5H43n2w)
-        - [](https://mp.weixin.qq.com/s/znEaMZqfrLAc6vAsqtbBzw)
+        - [干货分享 | IGV软件的安装和常用操作介绍](https://mp.weixin.qq.com/s/mRE65voGQTW-wVs5H43n2w)
+        - [使用IGV对比对结果bam文件进行可视化-2023-06](https://mp.weixin.qq.com/s/znEaMZqfrLAc6vAsqtbBzw)
+        - [未看](https://www.bilibili.com/video/BV1x64y1J7Aw/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+        - [未看](https://www.bilibili.com/video/BV1gciVeMEx1/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
     - 安装与简介
         - IGV是一个将基因组学数据可视化的可交互工具，可用于展示和查看基因表达、突变、融合、甲基化、探针等多种信息。
         - [IGV 安装](https://mp.weixin.qq.com/s/JUcjo1BCyZc2dnsYw4aXTA)
@@ -882,7 +898,7 @@
             - biomaRt包可以轻松获取Ensembl上的数据，可以在各种基因名和不同的基因ID之间进行转换，也可以根据基因的ID获取基因的序列，还可以获取GO注释，SNPs的信息；
         -  基本使用：
             1. 选择你需要的database：
-                - 这一步就是选择BioMart要链接到的数据库； 
+                - 这一步就是选择BioMart要链接到的数据库；注意：[ensembl和Ensembl plants不是一个](https://www.biostars.org/p/247303/)
                 - BioMart database与Ensembl database的关系：
                     - BioMart是一个更广泛的数据查询平台/工具，它可以访问多个生物学数据库，如Ensembl、Uniprot、WormBase；而Ensembl只是其中一个数据库，仅包含 Ensembl 提供的基因、变异、调控数据；
                     - useEnsembl()直接连接到 Ensembl BioMart 数据库，只适用于Ensembl database，用户不需要手动指定 URL，相关函数有`listEnsembl() listEnsemblGenomes()`；而useMart()可以连接 BioMart 平台中的任意数据库，适用于所有 BioMart 提供的数据库，可以使用`listMarts()`进行所支持的数据库列表查询；
@@ -928,3 +944,4 @@
                 - 上面相当于构建了一个数据库，里面包含了所有的数据，下面需要制定你的检索条件，该函数主要包含三个参数：
                     - filters和values这两个参数定义你检索的条件，比如想检索位于X染色体上所有的基因，则你的filters为"chromosome_name",value参数为"X"
                     - attributes：指定返回的结果都包含哪些信息，比如entrezgene_id；可以使用`attributes = listAttributes(ensembl);attributes[1:5,]`查看可以获取的Attributes。
+
