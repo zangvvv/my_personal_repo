@@ -32,4 +32,4 @@
         - Register Anaconda as the system Python：表示将使anaconda成为系统中的默认Python版本，这意味着当您在任何命令提示符窗口中输入 python 时，系统将默认使用 Anaconda 的 Python 解释器。如果 Anaconda 是您唯一的或主要的 Python 环境，推荐勾选此项。这样可以让其他程序，如 VSCode 或 PyCharm，自动识别 Anaconda 为系统的主 Python 版本。
         - Clear the package cache upon completion：安装完后清楚缓存包；
     5. 配置环境变量
-        -   
+        - 开始菜单——输入环境变量——编辑系统环境变量——高级——环境变量——

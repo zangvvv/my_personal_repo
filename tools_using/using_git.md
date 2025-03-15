@@ -99,7 +99,7 @@
             - `git commit -m "本次提交的描述"`：commit只是将代码提交给仓库，还没有推送到远程；
             - <a href="https://imgse.com/i/pEmkji9"><img src="https://s21.ax1x.com/2025/02/07/pEmkji9.png" alt="pEmkji9.png" border="0" width="70%" height="80%"/></a>
     2. 其次，在github上新建一个远程仓库，复制到其仓库链接（比如我的临时仓库 https://github.com/zangvvv/test_repo.git） 
-    3. 然后将本地Git仓库与github远程仓库关联：(如果不关联就是单独的操作仓库。如果直接clone了项目在本地好像就不用这一步)
+    3. 然后将本地Git仓库与github远程仓库关联：(如果不关联就是单独的操作仓库。如果直接clone了项目(大概率是ssh链接那个而不是https）在本地好像就不用这一步)
         - 输入`git remote add origin https://github.com/zangvvv/my_personal_repo.git`
     4. 最后，将本地项目上传本地项目到github：
         - 输入`git push -u origin main -f`
