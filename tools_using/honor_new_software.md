@@ -29,8 +29,9 @@
         - 有一些插件暂时还不适配zotero7：zotfile，但是可用[zotero attenger代替，但是据说bug不少](https://blog.csdn.net/weixin_44628096/article/details/144422089)
         - 新安装的插件：
             - zotero pdf rename：
-            - Sci-PDF
+            - Sci-PDF：可能是更方便从scihub下载文献的插件，没用过；
             - awesome gpt(之前的gpt不知道是不是同一个)：[大致流程：注册——APIkeys——填写设置](https://www.bilibili.com/video/BV1q1wRemE6n?spm_id_from=333.788.videopod.sections&vd_source=2523c7055f0985a7f47ca59739b6b086)
+            - [Zotero ID](https://github.com/qnscholar/zotero-if)：比较新的影响因子；
         - 之前就有的插件：茉莉花、GPT、Better Notes for Zotero、Translate for Zotero、ZotCard、Zotero Style（更新成Ethereal Style）、Zotfile、Zotero PDF Preview(Zotero7自带对pdf的预览，只不过只能左右，所以不用下载，并且也没有)
 6. anaconda
     1. 下载anaconda安装程序

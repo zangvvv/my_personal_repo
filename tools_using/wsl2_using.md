@@ -31,6 +31,7 @@
 	- 参考资料
        - [WSL安装CentOS7（视频）-202109](https://www.bilibili.com/video/BV1RL411x7Z1/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
        - [参考博客](https://www.cnblogs.com/zy115/p/18638254)
+       - [未看](https://www.cnblogs.com/zy115/p/18638254)
        - [参考推文1](https://mp.weixin.qq.com/s/PlcxEL5KXDX9e-lpWGzHcQ)
        - [参考推文2](https://mp.weixin.qq.com/s/sM3T9xt5MZG2ZzNvOl9_RA)
 	1. 进入[WSL版的cantos github地址](https://github.com/mishamosher/CentOS-WSL)，下载centos7.zip文件后解压到D盘；
