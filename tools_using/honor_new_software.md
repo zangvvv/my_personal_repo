@@ -34,6 +34,7 @@
             - [Zotero ID](https://github.com/qnscholar/zotero-if)：比较新的影响因子；
         - 之前就有的插件：茉莉花、GPT、Better Notes for Zotero、Translate for Zotero、ZotCard、Zotero Style（更新成Ethereal Style）、Zotfile、Zotero PDF Preview(Zotero7自带对pdf的预览，只不过只能左右，所以不用下载，并且也没有)
 6. anaconda
+    - 教程：[一步步教你在 Windows 上轻松安装 Anaconda以及使用常用conda命令（超详细）](https://blog.csdn.net/Natsuago/article/details/143081283)
     1. 下载anaconda安装程序
         - 打开[Anaconda 官方网站](https://www.anaconda.com/download)。登陆后点击Free Download免费下载适合自己操作系统的anaconda安装包；
         - 或者使用一些大学的开源软件镜像站[清华大学镜像站](https://repo.anaconda.com/archive/)
@@ -43,4 +44,12 @@
         - Register Anaconda as the system Python：表示将使anaconda成为系统中的默认Python版本，这意味着当您在任何命令提示符窗口中输入 python 时，系统将默认使用 Anaconda 的 Python 解释器。如果 Anaconda 是您唯一的或主要的 Python 环境，推荐勾选此项。这样可以让其他程序，如 VSCode 或 PyCharm，自动识别 Anaconda 为系统的主 Python 版本。
         - Clear the package cache upon completion：安装完后清楚缓存包；
     5. 配置环境变量
-        - 开始菜单——输入环境变量——编辑系统环境变量——高级——环境变量——
+        - 开始菜单——输入环境变量——编辑系统环境变量——高级——环境变量——系统变量——点击Path进行编辑——添加Anaconda路径：
+            ```
+            D:\anaconda3
+            D:\anaconda3\Scripts
+            D:\anaconda3\Library\bin
+            D:\anaconda3\Library\mingw-w64\bin  # 可选，用于编译 C/C++ 代码
+            D:\anaconda3\Library\usr\bin        # 可选，用于 UNIX 工具的兼容
+            ``` 
+        - 完成之后可以打开cmd输入`conda --version`进行验证
