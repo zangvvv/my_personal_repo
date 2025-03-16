@@ -346,6 +346,8 @@
                 - 富集程度可以通过富集因子（rich factor）即m/M，注释到此条目上的差异基因数m和p.adjust这三个指标来衡量。一般情况下。我们直观地认为m越大，该条目越重要，但就像人均GDP比GDP更能代表生活水平一样，研究者提出了对条目大小进行标准化的富集因子作为衡量指标之一。
                 - 以上描述的就是常规的GO和KEGG富集分析所采用的过度代表性分析（Over Representation Analysis，ORA）原理。总结为首先使用特定阈值创建输入列表（差异基因集），然后对输入列表进行功能归类和条目计数，最后采用超几何检验和多重假设检验校正计算富集的显著性。 
 1. KEGG富集
+    - 教程：
+        - [19.KEGG富集分析（未看）](https://www.bilibili.com/video/BV15MR8YHEM9/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086) 
     - 使用实例
         - 先准备一个id.txt文件，参考如下：
             - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250310160703.png"/>
@@ -373,7 +375,7 @@
         ```  
     - 使用clusterprofiler进行富集分析
         - 进行富集分析有很多在线工具，但是 
-2. GO富集
+3. GO富集
     - 使用clusterprofiler进行GO注释
         - 教程：
             - [水稻（Oryza sativa）如何批量地做GO富集分析](https://mp.weixin.qq.com/s/Q6HeR6fJSEE3NB1JYWqZtA)
@@ -387,7 +389,7 @@
             - [水稻的RAP MSU ID转换](https://zhuanlan.zhihu.com/p/700364719)
         3. 建立名为table和plot的文件夹，用于GO富集结果的存储
         4. 下载Osativa_GO_enrichment.R脚本后在终端运行
-3. reactome富集
+4. reactome富集
 ## 四、RNA-seq实验设计
 ### 相关问题
 1. 转录组分析是测序深度重要还是生物学重复重要？
@@ -424,76 +426,78 @@
 2. 基因ID转换
     - 教程
         - [关于基因ID转换，一文就够了](https://mp.weixin.qq.com/s/S7sf2okHP0cf7_SiV7SjMg)
+        - [基因富集工具DAVID介绍（一）-基因ID转换(未看)](https://www.bilibili.com/video/BV1X3411V7zo/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
     - 常见的基因iD
         - gene symbol或者说gene name：Gene symbol也分为官方的基因名和亚名，通俗点来说，就是大名（Official）和小名（亚名）。Official gene symbol可以做基因ID转换和富集分析，以及多个数据集的整合分析，基因亚名可以让年纪大一点/不懂生信的审稿人认出他们熟悉的基因名字，比如提到PTPRC，一般人不知道这个是CD45。
         - Gene ID，即Entrez ID：指的是来自于NCBI旗下的Entrez gene数据库所使用的编号，其实就是来自于NCBI里面的gene数据库。每个基因的编号具有唯一性，包括不同种属生物间的同源基因编号也不相同。
         - Ensemble ID，相对于NCBI的Entrez ID，Ensembl是另外一个记录基因信息的数据库。不管是什么类型的，Ensemble ID的前三个开头都是以ENS开头的（ENSG是基因，ENST是转录本）；
         - 除此之外，还有NCBI的refseq ID，常用于在NCBI数据库获取基因序列，比如引物设计，质粒构建。
-    - 常见模式动物的基因ID转换
-        1. 如果是人、小鼠等比较常见的物种（一般都是动物，没有水稻等植物）的基因ID的转换，可以使用类似于`org.Hs.eg.db`（人的）的一系列包进行转换，里面内置了对应物种的各种ID；
-            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307163003.png"/>
-            - 由于没用过就没有参考代码了；       
-        2. 使用biomaRt包进行种属内或种属间（就是物种，比如MH63和日本晴就属于不同物种）的基因ID转换
-            - 教程：
-                - [R语言biomaRt包基础使用方法](https://mp.weixin.qq.com/s/7vvxZomAYidrGXkfqQ4Zwg)
-                - [Ensemble官网BioMart及R语言biomaRt包获取人鼠同源基因(可以直接获取到对应的ID)](https://zhuanlan.zhihu.com/p/593447503)
-                - [未看（因为Ensembl和Ensembl plants不是一个数据库，可能要指定host参数](https://mp.weixin.qq.com/s/6njSl2nFqQKLMxF0X_PYJA)
-                - [官方文档（未看完）](https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/accessing_ensembl.html#introduction)
-            - 安装与简介
-                - 使用BiocManager安装；
-                - biomaRt包可以轻松获取Ensembl上的数据，可以在各种基因名和不同的基因ID之间进行转换，也可以根据基因的ID获取基因的序列，还可以获取GO注释，SNPs的信息；
-        -  基本使用：
-           -  - biomaRt包是从网页上加载注释的，网络不好的话比较慢，可以先将常使用的物种保存下来，每次使用的时候load一下即可。
-            1. 选择你需要的database：
-                - 这一步就是选择BioMart要链接到的数据库；注意：[ensembl和Ensembl plants不是一个](https://www.biostars.org/p/247303/)
-                - BioMart database与Ensembl database的关系：
-                    - BioMart是一个更广泛的数据查询平台/工具，它可以访问多个生物学数据库，如Ensembl、Uniprot、WormBase；而Ensembl只是其中一个数据库，仅包含 Ensembl 提供的基因、变异、调控数据；
-                    - useEnsembl()直接连接到 Ensembl BioMart 数据库，只适用于Ensembl database，用户不需要手动指定 URL，相关函数有`listEnsembl() listEnsemblGenomes()`；而useMart()可以连接 BioMart 平台中的任意数据库，适用于所有 BioMart 提供的数据库，可以使用`listMarts()`进行所支持的数据库列表查询；
-                    - 代码展示：
-                        ```
-                            # 连接 Ensembl 基因数据库
-                            ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+    1. 如果是人、小鼠等比较常见的模式物种（一般都是动物，没有水稻等植物）的基因ID的转换，可以使用类似于`org.Hs.eg.db`（人的）的一系列包进行转换，里面内置了对应物种的各种ID；
+        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307163003.png"/>
+        - 由于没用过就没有参考代码了；       
+    2. 使用biomaRt包进行种属内或种属间（就是物种，比如MH63和日本晴就属于不同物种）的基因ID转换
+        - 教程：
+            - [R语言biomaRt包基础使用方法](https://mp.weixin.qq.com/s/7vvxZomAYidrGXkfqQ4Zwg)
+            - [Ensemble官网BioMart及R语言biomaRt包获取人鼠同源基因(可以直接获取到对应的ID)](https://zhuanlan.zhihu.com/p/593447503)
+            - [未看（因为Ensembl和Ensembl plants不是一个数据库，可能要指定host参数](https://mp.weixin.qq.com/s/6njSl2nFqQKLMxF0X_PYJA)
+            - [官方文档（未看完）](https://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/accessing_ensembl.html#introduction)
+            - [【技能33】全站独1份-有声演示如何使用biomaRt包进行ID转换、GO注释（未看）](https://www.bilibili.com/video/BV1W341127bY/?vd_source=2523c7055f0985a7f47ca59739b6b086)
+            - [未看](https://www.jianshu.com/p/480c46ec1629)
+        - 安装与简介
+            - 使用BiocManager安装；
+            - biomaRt包可以轻松获取Ensembl上的数据，可以在各种基因名和不同的基因ID之间进行转换，也可以根据基因的ID获取基因的序列，还可以获取GO注释，SNPs的信息；
+    -  基本使用：
+       - biomaRt包是从网页上加载注释的，网络不好的话比较慢，可以先将常使用的物种保存下来，每次使用的时候load一下即可。
+        1. 选择你需要的database：
+            - 这一步就是选择BioMart要链接到的数据库；注意：[ensembl和Ensembl plants不是一个](https://www.biostars.org/p/247303/)
+            - BioMart database与Ensembl database的关系：
+                - BioMart是一个更广泛的数据查询平台/工具，它可以访问多个生物学数据库，如Ensembl、Uniprot、WormBase；而Ensembl只是其中一个数据库，仅包含 Ensembl 提供的基因、变异、调控数据；
+                - useEnsembl()直接连接到 Ensembl BioMart 数据库，只适用于Ensembl database，用户不需要手动指定 URL，相关函数有`listEnsembl() listEnsemblGenomes()`；而useMart()可以连接 BioMart 平台中的任意数据库，适用于所有 BioMart 提供的数据库，可以使用`listMarts()`进行所支持的数据库列表查询；
+                - 代码展示：
+                    ```
+                        # 连接 Ensembl 基因数据库
+                        ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
 
-                            # 查看可用数据集
-                            listDatasets(ensembl)
-                        ```
-                        ```
-                            # 列出 BioMart 平台所有可用的数据库
-                            listMarts()
+                        # 查看可用数据集
+                        listDatasets(ensembl)
+                    ```
+                    ```
+                        # 列出 BioMart 平台所有可用的数据库
+                        listMarts()
 
-                            # 连接 Ensembl BioMart
-                            ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
+                        # 连接 Ensembl BioMart
+                        ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
 
-                            # 查看可用数据集
-                            listDatasets(ensembl)
-                        ```
-                - 
-            2. 选择dataset/指定物种
-                - 每个物种就是一个dataset，`listDatasets()`可以展示有哪些dataset是可选的，但你可能很难从中找到你需要的。`searchDatasets()`提供了一个搜索功能，你可以检索你需要的物种，这里以人种为例，搜索hsapiens；
-                - 代码示例：
+                        # 查看可用数据集
+                        listDatasets(ensembl)
                     ```
-                        datasets <- listDatasets(ensembl)
-                        head(datasets)
-                        searchDatasets(mart = ensembl, pattern = "hsapiens")
-                    ```
-                - 知道要用的dataset后，接下来使用useDataset()来更新Mart对象：`ensembl <- useDataset(dataset = "hsapiens_gene_ensembl", mart = ensembl)`
-            3. 选择镜像
-                - 可以选择离你最近的镜像地址来加速数据的获取，镜像包括：useast, uswest, asia, www：`ensembl <- useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl", mirror = "useast")`
-            4. 选择Ensembl的版本
-                - listEnsemblArchives()可以显示可选的Ensembl版本;
-                - 代码示例：
-                    ```
-                        listEnsemblArchives()
-                        listEnsembl(version = 95) # 选择指定的Ensembl版本
-                        ensembl95 <- useEnsembl(biomart = 'genes', dataset = 'hsapiens_gene_ensembl', version = 95)
-                    ```
-            5. 使用getBM函数进行检索(根据attributes值的选择完成ID转换)
-                - 上面相当于构建了一个数据库，里面包含了所有的数据，下面需要制定你的检索条件，该函数主要包含三个参数：
-                    - filters和values这两个参数定义你检索的条件，比如想检索位于X染色体上所有的基因，则你的filters为"chromosome_name",value参数为"X"
-                    - attributes：指定返回的结果都包含哪些信息，比如entrezgene_id；可以使用`attributes = listAttributes(ensembl);attributes[1:5,]`查看可以获取的Attributes。 
-        1. 一些相应物种的数据库可以提供ID转换
-            - RIGW数据库，[Rice Information GateWay](http://rice.hzau.edu.cn/rice_rs3/)
-                - 使用ZS97和MH63为参考基因组，能提供ZS97、MH63、9311和日本晴之间的直系同源基因ID的转换，并提供KEGG和GO富集工具。
-                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>
+            - 
+        2. 选择dataset/指定物种
+            - 每个物种就是一个dataset，`listDatasets()`可以展示有哪些dataset是可选的，但你可能很难从中找到你需要的。`searchDatasets()`提供了一个搜索功能，你可以检索你需要的物种，这里以人种为例，搜索hsapiens；
+            - 代码示例：
+                ```
+                    datasets <- listDatasets(ensembl)
+                    head(datasets)
+                    searchDatasets(mart = ensembl, pattern = "hsapiens")
+                ```
+            - 知道要用的dataset后，接下来使用useDataset()来更新Mart对象：`ensembl <- useDataset(dataset = "hsapiens_gene_ensembl", mart = ensembl)`
+        3. 选择镜像
+            - 可以选择离你最近的镜像地址来加速数据的获取，镜像包括：useast, uswest, asia, www：`ensembl <- useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl", mirror = "useast")`
+        4. 选择Ensembl的版本
+            - listEnsemblArchives()可以显示可选的Ensembl版本;
+            - 代码示例：
+                ```
+                    listEnsemblArchives()
+                    listEnsembl(version = 95) # 选择指定的Ensembl版本
+                    ensembl95 <- useEnsembl(biomart = 'genes', dataset = 'hsapiens_gene_ensembl', version = 95)
+                ```
+        5. 使用getBM函数进行检索(根据attributes值的选择完成ID转换)
+            - 上面相当于构建了一个数据库，里面包含了所有的数据，下面需要制定你的检索条件，该函数主要包含三个参数：
+                - filters和values这两个参数定义你检索的条件，比如想检索位于X染色体上所有的基因，则你的filters为"chromosome_name",value参数为"X"
+                - attributes：指定返回的结果都包含哪些信息，比如entrezgene_id；可以使用`attributes = listAttributes(ensembl);attributes[1:5,]`查看可以获取的Attributes。 
+    3. 一些相应物种的数据库可以提供ID转换
+        - RIGW数据库，[Rice Information GateWay](http://rice.hzau.edu.cn/rice_rs3/)
+            - 使用ZS97和MH63为参考基因组，能提供ZS97、MH63、9311和日本晴之间的直系同源基因ID的转换，并提供KEGG和GO富集工具。
+            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>
     
 
