@@ -28,7 +28,7 @@
         - zotero6升级到7之后，会有很多插件diabled；可以下载“zotero插件市场”这个插件，首先下载[该插件下载地址](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)，然后点击“工具——Plugins——设置小图标——install plugin from file”，选择xpi文件安装，安装之后就可以在主界面搜索栏左侧看到一个插件小图标；右击插件即可更新或安装卸载，如果找不到某个插件可以右下角更新插件源后刷新看看。
         - 有一些插件暂时还不适配zotero7：zotfile，但是可用[zotero attenger代替，但是据说bug不少](https://blog.csdn.net/weixin_44628096/article/details/144422089)
         - 新安装的插件：
-            - zotero pdf rename：
+            - zotero pdf rename：对拉入的pdf进行重命名，不过好像不能自动命名。
             - Sci-PDF：可能是更方便从scihub下载文献的插件，没用过；
             - awesome gpt(之前的gpt不知道是不是同一个)：[大致流程：注册——APIkeys——填写设置](https://www.bilibili.com/video/BV1q1wRemE6n?spm_id_from=333.788.videopod.sections&vd_source=2523c7055f0985a7f47ca59739b6b086)
             - [Zotero ID](https://github.com/qnscholar/zotero-if)：比较新的影响因子；
