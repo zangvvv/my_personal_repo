@@ -125,4 +125,7 @@
         - 3、最后git push origin master，这样就推送到自己的仓库了。（最后这句可以不用）
     - 报错：`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Failed to connect to github.com port 443 after 21103 ms: Could not connect to server` 或者是`fatal: unable to access 'https://github.com/zangvvv/my_personal_repo.git/': Open SSL SSL_read: SSL_ERROR_SYSCALL, errno 0`
         - 不知道啥原因，有时候重新改一下commit的名字就行；然后使用`git push -u origin main -f`进行推送而不是`git push`；或者重试一遍就可以；
+    - warning：`warning: in the working copy of 'R_learning/R.md', LF will be replaced by CRLF the next time Git touches it` 
+        - [git提示“warning: LF will be replaced by CRLF”的解决办法](https://blog.csdn.net/u012757419/article/details/105614028) 
+        - LF就是换行，CRLF就是回车+换行，就是说git在提交时会自动济宁这个转换；可以使用`git config --global core.autocrlf true`，把它设置成 true，这样在检出代码时，换行会被转换成回车和换行：下次就不会有这个报错了。
  

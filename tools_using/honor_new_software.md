@@ -33,6 +33,17 @@
             - awesome gpt(之前的gpt不知道是不是同一个)：[大致流程：注册——APIkeys——填写设置](https://www.bilibili.com/video/BV1q1wRemE6n?spm_id_from=333.788.videopod.sections&vd_source=2523c7055f0985a7f47ca59739b6b086)
             - [Zotero ID](https://github.com/qnscholar/zotero-if)：比较新的影响因子；
         - 之前就有的插件：茉莉花、GPT、Better Notes for Zotero、Translate for Zotero、ZotCard、Zotero Style（更新成Ethereal Style）、Zotfile、Zotero PDF Preview(Zotero7自带对pdf的预览，只不过只能左右，所以不用下载，并且也没有)
+        - better notes的模板失效：
+            - 报错：TypeError: Zotero.ZoteroStyle.data.ztoolkit.ItemTree is undefined. 插件版本不一致，所以需要更新一下适用于Zotero7的模板代码；
+            - 具体如下：
+                - 进入编辑——设置——better notes——打开模板编辑器——复制以下四个模板代码保存成条目类型的模板：
+                - [PaperNote 适配Zotero 6 7 中英文文献 自用SCI笔记模版 简约清晰风格](https://github.com/windingwind/zotero-better-notes/discussions/771)
+                - [（2024.06.19适配7） 自用读中文文献、读英文文献笔记模板两套，简约风格](https://github.com/windingwind/zotero-better-notes/discussions/729)
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250319204924.png"/>
+            - 注意：
+                - 所需的插件相应升级一下，之前常用的模板代码都有自定义过，后续需自己更新；
+                - 之前用的Zotero6的笔记依旧可查改（后续再看）。
+                - 用模板生成笔记的位置变了。[未看](https://www.bilibili.com/video/BV17vvee6Eoj/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
 6. anaconda
     - 教程：[一步步教你在 Windows 上轻松安装 Anaconda以及使用常用conda命令（超详细）](https://blog.csdn.net/Natsuago/article/details/143081283)
     1. 下载anaconda安装程序
