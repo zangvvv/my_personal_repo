@@ -22,7 +22,57 @@
 3. [FPKM,TPM, Counts: 谁更适合做差异分析？](https://mp.weixin.qq.com/s/2nGsywVxvUg5X08-ZDQThQ)
     - 首先，gene counts不能与基因的表达量划等号很好理解，而TPM相比于FPKM考虑到了个样本文库大小之间的差异，更加准确；
     - "TPM, FPKM, or Normalized Counts?..."一文指出：TPM和FPKM仅适合用于样本内不同基因表达量的高低比较，而不能用于同一基因在不同样本、不同分组间的比较。具体成分上面这篇教程有讲到，总之就是建议使用基于counts的差异分析（即DESeq2或edgeR），而不要用TPM与FPKM这类经"normalization"后的值。
-4. [数据是TPM，想做差异只能转换？](https://mp.weixin.qq.com/s/Z68LhqHlcBNrK6QhiXFy9A)
+4. 几种标准化与log2FC
+    - 教程
+        - [RNAseq标准化丨CPM、RPKM、FPKM、TPM有什么区别与联系？（看表达式和例子）](https://mp.weixin.qq.com/s/9TOumsgc48w1RRpxrPMe_A) 
+        - [RPKM、FPKM、TPM还在傻傻分不清？（有一个简单的计算过程）](https://mp.weixin.qq.com/s/yeqrOKxEBMeMh2Q-nuamsg) 
+        - [数据标准化的几种方法，如何使用？代码如下（只用看代码）](https://mp.weixin.qq.com/s/kLx1sUAf_O-iK7-5hBqyKA)
+        - [Counts FPKM RPKM TPM CPM 的转化](https://zhuanlan.zhihu.com/p/513391213)
+    - CPM（只考虑了测序深度的标准化，没有考虑基因长度）：
+        - CPM（Counts Per Million,每百万映射读数）是指将映射到转录本的原始读数数量，经过测序样本中的读数数量标准化后，乘以一百万。举个例子，某次RNA-seq中测序了一个包含500万个读数的文库。其中，总共有400万个读数（应该是一个样本里的）与基因组序列匹配，对于某个基因，有5000个计数在参考基因组上，则CPM为：
+            - `CPM = 5000/(4*10^6)*10^6=1250`
+        - CPM对RNA-seq数据进行了测序深度的标准化，但没有考虑基因长度。因此，尽管它是一种样本内标准化方法，但CPM标准化不适用于对基因表达进行样本内比较。
+            ```
+                cpm_normalize <- function(counts) {
+                total_counts <- colSums(counts) # 计算样本的counts之和
+                # print(total_counts)
+                # print(t(counts))
+                cpm <- t(t(counts) / total_counts) * 1e6
+                return(cpm)
+                }
+            ``` 
+    - FPKM/RPKM
+        - FPKM（Fragments Per Kilobase Million，每百万片段的转录本千碱基数）适用于双端数据，而RPKM（Reads Per Kilobase Million，每百万读数的转录本千碱基数）适用于单端数据，它们校正了文库大小和基因长度的变化。经过上游处理，双端测序两个reads可以对应一个片段的过程已经完成，最后得到的counts就已经相当于是片段fragments了，因此下游分析由counts计算RPKM、 FPKM这两者的公式完全一致。
+        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250325102152.png"/>
+            - 对于某个基因i，其映射到参考基因组上的计数为ri，而全部基因在参考基因组上的计数和为R；其中li是基因的长度（以千碱基为单位），10^3是用于基因长度的标准化的因子，而10^6则是用于测序深度的标准化因子。
+        - 举个例子，某次RNA-seq中测序了一个包含500万个读数的文库。其中，总共有400万个读数与基因组序列匹配，对于某个基因，其长度为2000，有5000个计数在参考基因组上，则RPKM为：
+            - `RPKM=5000*10^3*10^6/(4*10^6*2000)=625`
+        - 注意，以上标准化方法只适用与样本内的比较，不适合用于样本间的比较。原因在于，对于不同的样本，总计数R是不相同的。
+            ```
+                counts2FPKM <- function(count=count, efflength=efflen){ 
+                    PMSC_counts <- sum(count)/1e6   #counts的每百万缩放因子 (“per million” scaling factor) 深度标准化
+                    FPM <- count/PMSC_counts        #每百万reads/Fragments (Reads/Fragments Per Million) 长度标准化
+                    FPM/(efflength/1000)            #FPKM                      
+                    } 
+            ``` 
+    - TPM
+        - 由于每个样本的总标准化计数都会不同，所以又提出了TPM。TPM的计算方法同RPKM很类似，同样的对基因长度和测序深度进行标准化，只不过RPKM是先进行测序深度标准化，后进行基因长度标准化；而TPM是「先进行基因长度标准化，后进行测序深度标准化」。事实证明，TPM的标准化方法更有优势。
+        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250325104132.png"/>
+        - 将每个转录本的相应RPKM和TPM值进行加总后，可以发现不同转录本的总RPKM并不相同，而进行TPM变换后的加总TPM值是相同的。事实上所有进行TPM变换后的转录本的加总TPM值都是相同的（正常情况下，是百万）。由于RNA-seq就是为了通过比较不同样本间的标准化后的Read数差异来得出基因表达量差异的结果，那么不同样本的加总RPKM不同，就会导致无法通过直接比较RPKM值确定两者的差异。
+            ```
+                # 假设你已经有了转录本长度信息
+                gene_length <- c(10000, 20000, 15000)
+                # 手动实现TPM标准化
+                tpm_normalize <- function(counts, gene_length) {
+                rpk <- counts / (gene_length / 1000)
+                print(rpk)
+                rpk_sum <- colSums(rpk)
+                tpm <- t(t(rpk) / rpk_sum) * 1e6
+                return(tpm)
+                } 
+            ``` 
+    - log2FC
+        - 一般在做基因表达分析时，会对数据进行log2转化，目的是避免极大差异值的过度偏倚，让数据更符合正态分布，便于后续分析。假设：在A组中，基因X的表达量为x在B组中，基因X的表达量为y，则`log2FC = log2(x+1)-log2(y+1) = log2((x+1)/(y+1))`  
 ### 1.2 异常样本与重复性检测
 1. [转录组专题|关于样本重复性问题](https://zhuanlan.zhihu.com/p/444061613)
     - [如何区分生物学重复和技术性重复？](https://zhuanlan.zhihu.com/p/276402875)
@@ -58,6 +108,7 @@
     - 是否有离群样本;
 ### 1.3 差异表达分析  
 ## 二、进行异常样本与重复性检测
+[有了TPM，怎么做基因表达分析、相关性分析和主成分分析](https://www.jianshu.com/p/d1bb8f6cd46b)
 ### 2.1 样本表达总体分布图
 1. 目的
     - 使用箱线图或小提琴图或概率密度分布图去观察：1、单个样本的数据分布特点；2、多个样本之间的差异。
@@ -65,7 +116,7 @@
 ### 2.2 PCA分析
 1. 理论知识
     - 教程：
-        - [【官方双语】一个视频带你理解PCA（主成分分析）！](https://www.bilibili.com/video/BV1dqikY5EBi/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+        - [【官方双语】一个视频带你理解PCA（主成分分析）！（推荐）](https://www.bilibili.com/video/BV1dqikY5EBi/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
         - [PCA原理和简单推导](https://www.bilibili.com/video/BV1X54y1R7g7/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
         - [未看](https://zhuanlan.zhihu.com/p/37777074)
     - 相关背景
@@ -73,5 +124,121 @@
     - 基本原理
         - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/efbe4b9f70298b5229281abb1811390.jpg"/>  
 2. 实际操作
+    - [R语言的ggplot2+ggforce包绘制散点图并添加分组边界](https://mp.weixin.qq.com/s/EbFvY0okvaJZqAHI0u4eDQ)
+    - [转录组专题11| 如何得到这么漂亮的PCA图？](https://mp.weixin.qq.com/s/ZzLUoYMzDXRrQbnCS59iBA)
+3. 可视化（都未整理）
+    - [【R>>ggforce】给Cluster画个小圈圈](https://www.jianshu.com/p/93d6d98a799a)
+    - [R语言的ggplot2+ggforce包绘制散点图并添加分组边界](https://www.jianshu.com/p/50e75cb66651)
+    - [错误:点太少，无法计算具有3个点的椭圆？-R](https://cloud.tencent.com/developer/ask/sof/105654411)
+### 2.3 样本相关性分析
+1. 理论知识
+    - 教程：
+        - [数据分析-相关性分析-理论](https://www.bilibili.com/video/BV1Zg411L7Vd/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+        - [临床医生科研作图 —— 样本间相关性分析](https://www.bilibili.com/video/BV1EG411q7xU/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+    - 度量变量之间的关系有哪些？
+        - 函数关系：一一对应；
+        - 相关关系：
+            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250323104505.png"/>
+            - 完全正线性相关不等于函数关系，因为样本的完全正线性相关不一定等于总体的完全正线性相关，需要进行检验。
+        - 因果关系：比较难。
+    - 什么时候需要进行样本相关性分析？
+        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250323111305.png"/>
+        - 基因间的相关性就是两个基因在这些样本表达值的相关程度，样本间的相关性就是两个样本的这些基因的表达值是否相关。
+        - 可视化形式：散点图：一个图只能展现两个样本之间的相关性、而热图可以在一个图中展现每两个样本间的相关系数；
+    - **样本**相关性程度的度量（线性相关）
+        - 皮尔逊相关系数
+            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250323105132.png"/>
+            - 使用该相关系数的条件
+                - 样本数据来源于正态总体
+            - 相关系数的显著性检验
+                - t检验
+            - 注意事项
+                - 非线性相关性也会导致线性相关系数很大，所以使用该参数时先画个散点图看看大致关系；
+                - 离群点对相关系数的影响也会很大，需要提前去除，也可画个散点图看看；
+                - 相关系数为0，只能说不是线性相关；
+        - 斯皮尔曼相关系数 
+2. 实际操作
+### 基于TPM值的筛选差异基因
+1. 理论部分
+    - 教程
+        - [数据是TPM，想做差异只能转换？（Wilcoxon秩和检验）](https://mp.weixin.qq.com/s/Z68LhqHlcBNrK6QhiXFy9A)
+        - [只有fpkm怎么进行基因表达差异分析？](https://www.zhihu.com/question/445830860) [只有tpm怎么进行基因表达差异分析？](https://www.zhihu.com/question/1059639456) （都建议试试limma-trend）
+        - [TPM to differential expression(建议获取raw counts)](https://www.biostars.org/p/9470568/)
+        - [Differential expression analysis starting from TPM data（不建议用TPM做差异表达基因筛选）](https://support.bioconductor.org/p/98820/)
+        - [What can I do if I only have TPM but not raw counts data?（建议实在不行试试limma-trend）](https://support.bioconductor.org/p/123155/)
+    - 背景
+        - 常用的差异分析方法，如limma、edgeR、DESeq2进行差异分析都需要用到counts，而后续很多分析都是基于log2(TPM+1)，想要补一个差异分析，需要另外收集counts数或者对TPM值进行转换，这两种可能都比较麻烦，有一些方法可以直接利用TPM进行差异表达基因筛选，比如（1）采用tximportR包，将结果导入到DESeq2种进行分析；（2）直接采用sleuthR包进行差异分析；（3）利用Wilcoxon秩和检验+FDR矫正；（4）使用limma-trend包；。
+        - 方法一和二都是要在指定的定量软件下定量比较好，不然没用。
+2. 利用Wilcoxon秩和检验+FDR矫正（[最好有前置内容：edgeR和limma包使用](https://www.jianshu.com/p/bdf2b72b8761)）
+    1. 准备TPM数据与所用的包
+        - egdeR、limma、future.apply包
+    2. 数据前期处理并标准化
+        - 使用EdgeR的filterByExpr()删除低表达基因；
+        - TMM (Trimmed Mean of M-values) 标准化，使样本间表达量更可比。
+    3. 对每个基因进行Wilcoxon秩和检验
+        - 用你future.apply进行加速
+    4. 计算每个基因的差异倍数（logFC）
+    5. 基于FDR阈值的输出结果
+3. 利用sleuth包进行差异分析（和下面这个方法一样对我没用）
+    - 教程
+        - [使用salmon和sleuth进行小麦RNA-seq差异表达分析](https://www.jianshu.com/p/73420cb70548)
+        - [RNA-seq:Kallisto+Sleuth (2)](https://www.jianshu.com/p/460722ecd23e)
+        - [sleuth:基于TPM值的差异分析](https://mp.weixin.qq.com/s/5p6yrB1JFOWZ9mSIoIxPXg)
+    - 安装与简介
+        - 它根据Kallisto获得的定量结果进行差异分析；此外，它支持在复杂实验设计背景下进行统计检验，并通过sleuth live提供交互式探索性数据分析；
+        - `BiocManager::install("pachterlab/sleuth")`，首先要有devtools。
+    - 使用方法（使用salmon和Kallisto进行定量都可以）
+        1. 选择使用wasabi包进行结果转换
+            - sleuth包是为Kallisto量身定制的，如果是salmon软件进行定量，可以通过wasabi包进行转换；
+        2. 准备分组文件sample_infor.txt和转录本ID与基因ID对应的文件transcript_gene_relation.txt
+            - 分组信息文件包括sample和condition两列；注意第一列的顺序要按字母顺序排列；
+            - ID对应文件为transcript_id和gene_id两列；
+        3. 读取salmon的定量数据
+            - salmon的结果文件好像不止一个； 
+        4. 读取样本分组信息文件和ID对应关系文件
+        5. 设置两两比较的实验组
+            - 比如`a <- list(c("CS_CT","ABA1h"), c("CS_CT","ABA12h"), c("CS_CT","ABA24h"),c("ABA1h","ABA12h"), c("ABA1h","ABA24h"), c("ABA12h","ABA24h"))`
+        6. 进行差异表达分析（DEA）
+            1. 构建sleuth对象
+            2. 进行统计检验
+            3. 获取显著性结果
+            4. 保存差异表达结果
+            5. 获取标准化表达矩阵
+4. 利用tximport包+DESeq2进行差异分析（来源可以是Kallisto或者Salmon的定量结果，反正我这不知道哪来的是不行的，而且应该是一系列结果文件）
+    - 教程：
+        - [通过tximport将Salmon结果传递给DESeq2最直白过程](https://www.jianshu.com/p/c3efde425f0b)
+        - [Stringtie+tximport+DESeq2 (tximport具体操作向）](https://zhuanlan.zhihu.com/p/85332471)
+        - [官方文档](https://bioconductor.org/packages/release/bioc/manuals/tximport/man/tximport.pdf)
+        - [tximport 将 Salmon 定量结果导入 DESeq2（挺详细的）](https://mp.weixin.qq.com/s/ZqYCNZzKX7LdXh13h26MnQ)
+    - 安装与简介：
+        - 使用BiocManager安装；
+        - 用于简化TPM值定量等文件导入到DESeq2，以进行下游分析；
+    - 使用方法：
+        1. 读取转录本与基因关系文件transgene.csv：
+            - 该文件的第一列为转录本id，第二列为基因id，需要加表头；
+        2. 获取或构建sample的DataFrame:
+            - 第一列为run（如SRR号），第二列为condition（control or treat）；
+        3. 读取基因表达文件：
+            - `txi <- tximport(files, type="salmon", tx2gene=tx2gene)`
+                - type可以是"salmon", "sailfish", "alevin", "piscem", "oarfish", "kallisto", "rsem", "stringtie",or "none" 
+        4. 将tximport导入的结果传递给DESeq2：
+            - `dds <- DESeqDataSetFromTximport(txi, colData=samples, design= ~ condition)` 
+5. 学习limma包
+    - 教程
+        - [官方文档](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf)
+### 2.4 定量
+由于老师后面给了比对数据，所以不用再用TPM进行差异基因筛选。
+1. 软链接源文件以及MSU的基因组注释文件
+    - 首先由于bam文件较大，可以将Data目录下的upload文件夹通过软链接链接到当前目录：`ln -s /gss1/home/huangju02/hj/Data/RiceRNA/upload ./01_bam_files`。
+    - `ln -s /gss1/home/huangju02/hj/vvv/rice3k/NIP_genome_data/nip_version7/all.gff3 ` 放在`/gss1/home/huangju02/hj/vvv/RNA_seq`下面。
+2. 确定这个bam文件是否经过排序
+    - 命令如下：`samtools view ./1-1-1Aligned.toTranscriptome.out.bam | less -SN`
+    - 这个bam文件是根据name进行排序的，但是有几点问题：它的第三列是转录本ID而不是染色体名称；而且它的MPOS和ISIZE列都是0，但是CIGAR/比对模式都是150M，都能够match上。
+    - 只要是经过排序，不管是根据fragment name还是根据pos；
+3. 鉴定数据的建库方式
+    - 由于MSU没有提供对应的gtf文件，所以只能看看Ensembl的GTF文件可不可行。同样将其下载到`/gss1/home/huangju02/hj/vvv/rice3k/NIP_genome_data/ensemble`之后再用软链接到`/gss1/home/huangju02/hj/vvv/RNA_seq`下面。
+
+
+
 
 

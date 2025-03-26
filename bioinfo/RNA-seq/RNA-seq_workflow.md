@@ -315,6 +315,8 @@
    - <a href="https://imgse.com/i/pEnGA5n"><img src="https://s21.ax1x.com/2025/02/10/pEnGA5n.png" alt="pEnGA5n.png" border="0"></a>
    - <a href="https://imgse.com/i/pEnGFEj"><img src="https://s21.ax1x.com/2025/02/10/pEnGFEj.png" alt="pEnGFEj.png" border="0"></a>
 ### 3.7 差异表达分析
+- 教程：
+    - [转录组分析——差异表达分析](https://blog.bio-site.cn/archives/328)
 1. 准备工作
     - 可以使用的软件：DESeq2
 2. 基因名称注释
@@ -499,5 +501,8 @@
         - RIGW数据库，[Rice Information GateWay](http://rice.hzau.edu.cn/rice_rs3/)
             - 使用ZS97和MH63为参考基因组，能提供ZS97、MH63、9311和日本晴之间的直系同源基因ID的转换，并提供KEGG和GO富集工具。
             - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>
-    
-
+未看的东西：
+[RNA-seq用hisat2、stringtie、DESeq2分析](https://www.jianshu.com/p/b86e5598468b)
+[RNA-seq(3)：Hisat2+HTSeq+DESeq2流程](https://pzweuj.github.io/posts/rna-seq-3)
+[R语言如何绘制韦恩图（ggvenn）](https://zhuanlan.zhihu.com/p/609403318)
+[limma、DESeq2、edgeR差异分析及绘制韦恩图](https://www.jianshu.com/p/db2a521f44cd)

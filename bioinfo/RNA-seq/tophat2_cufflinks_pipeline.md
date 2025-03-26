@@ -63,7 +63,6 @@
             - align_summary.txt能够显示比对效率以及多少Read能够多处比对；`concordant pair alignment rate`显示比对率，一般75-90%，如果是某几条染色体则会相应降低。
 ## 第二步 使用cufflinks软件进行表达量计算
 - 教程：（老，不常用了，效率不高）
-    - [转录组分析（四）tophat+cufflinks篇](https://zhuanlan.zhihu.com/p/561285944)
     - [github-cufflinks文档](https://github.com/cole-trapnell-lab/cufflinks/blob/master/doc/html/manual.html)
     - [完整转录组RNAseq分析流程（tophat2+cufflink+cuffdiff）(有自己的代码，还算详细，)--2020-03](https://www.jianshu.com/p/0ab0e2aeca14)
     - [转录组分析（四）tophat+cufflinks篇（有代码）-2022-09](https://zhuanlan.zhihu.com/p/561285944)
@@ -205,4 +204,4 @@
        - 是cuffdiff做RNA-seq的下游工具；CummeRbund创建了一个SQLite数据库，将cuffdiff运行产生的结果都存储到数据库中，将genes、transcripts、transcriptionstart sites、以及CDS建立关联。将这些数据存储到数据库中，并建立相关的索引，就可以很容易的对多个样本之间或者其他条件的数据进行查询检索，允许用户对于单个或者一组基因的各种feature进行比较分析。同时还提供了诸多的绘图函数，可以满足一般的数据可视化需要。
        - 使用`BiocManager::install("cummeRbund")`进行安装；
    - 使用方法：由于最终没有完成，故没有参考代码。
-2. 根据  
+2. [根据gene_exp.diff结果进行分析](https://www.jianshu.com/p/0abbf9989761)

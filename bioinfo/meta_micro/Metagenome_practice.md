@@ -2,6 +2,10 @@
 #  <center><font face="楷体" size=5>by 藏之地</font></center>
 ## 一、文献中的流程和代码
 [复现文章，未看](https://mp.weixin.qq.com/s/xTEWKHdIe676TePvMGHTew)
+[一篇中文硕士论文的代码](https://github.com/YipZR/PET)
+[教程](https://mp.weixin.qq.com/s/s7CpHeRbv_AinKzUdRlLnA)
+[教程的github地址](https://github.com/taowenmicro/Megagenome_learing)
+[文献的代码库](https://zenodo.org/records/3405565)
 ## 二、准备工作
 1. 环境配置和软件下载
 建立名为metagenome的环境，下载包：bamm、bwa、diamond、eggnog-mapper、khmer、kraken、prodigal、quast、report（R包）、seqtk、spades、vsearch、seqkit（有一个抽样的功能）、pigz（重新压缩，最后并未使用）；
@@ -15,7 +19,7 @@
 ## 三、质控
 1. 使用skewer去除barcode等非生物序列
     - 教程：
-        - [Skewer User’s Manual](https://sourceforge.net/projects/skewer/)
+        - [Skewer User’s Manual](https://sourceforge.net/projects/skewer/postdownload)
         - [基本上照搬软件自带的帮助文档](https://www.jianshu.com/p/daa580f484c7)
     - 简介与安装
         - 是一款良好的barcode去除软件，用于双端测序序列barcode的去除；
@@ -32,3 +36,4 @@
             - -t：线程数；
             - --quiet：不显示进度；
             - -M|--matrix {string}：接受一个制表符分隔的文件，将正向和反向的接头序列写在一个文件中，有了-x和-y就不用了吧；
+         

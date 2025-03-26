@@ -1,28 +1,29 @@
 # <font face="仿宋" color=orange>转录组练习</font>
 # <center><font face="楷体" size=5>by 藏之地</font></center>
 ## 一、文献中RNA-seq流程
-1. 序列质量评估：FastQC
-2. 过滤接头和低质量序列：Trimmomatic (0.36)
-3. mapping:TopHat2 (2.1.0)
-4. 基因表达定量：Cufflinks (2.2.1)
-    - 参数设置：Expressed genes were defined as those with FPKM > 1.
-6. 筛选差异基因：R包DESeq2
-    - 参数设置：adjusted p value < 0.05 and log2 fold-change > 1.5.；
-7. 练习数据有513个Sample（但是文中说的是510个数据），也就是对应了513个GSM编号；共有ChIP-seq（355 samples）、RNA-seq（58）、FAIRE-seq（58）、BiSulfite-seq（38）、ChIP-reChIP-seq（4）5个数据集，即对应5个GSE编号，共513个样本。
+1. 软件与参数
+    - 序列质量评估：FastQC
+      1. 过滤接头和低质量序列：Trimmomatic (0.36)
+      2. mapping:TopHat2 (2.1.0)
+      3. 基因表达定量：Cufflinks (2.2.1)
+          - 参数设置：Expressed genes were defined as those with FPKM > 1.
+      4. 筛选差异基因：R包DESeq2
+          - 参数设置：adjusted p value < 0.05 and log2 fold-change > 1.5.；
+2. 数据
+    - 练习数据有513个Sample（但是文中说的是510个数据），也就是对应了513个GSM编号；共有ChIP-seq（355 samples）、RNA-seq（58）、FAIRE-seq（58）、BiSulfite-seq（38）、ChIP-reChIP-seq（4）5个数据集，即对应5个GSE编号，共513个样本。
 ## 二、准备工作
-1. 构建项目目录以及参考序列下载
-    - 原始数据目录raw_data
+1. 构建项目目录以及相关文件下载
+    - 原始数据目录0_data、fastqc运行结果1_fastqc、质控之后的结果2_clean_data
     - 基因组文件（ensembl、JGI等或物种专用网站）和注释信息文件ref
-    - 质控之后的结果clean_data
     - 结果文件：比对结果和定量结果
-2. 原始数据下载或上传
-    1. 用prefetch下载序列以及提取成fastq文件
-        - 进入GEO后选择RNA-seq数据，点击进入RNA-seq的GSE数据，点击`SRA run selector`进入样本下载界面；
-        - 选择好样本后导出样本，使用`prefetch -f no -p --option-file SRR_mh63_nippobare_rna-seq.txt`进行下载得到sra文件；
+2. 获得fastq文件
+    1. 用prefetch下载序列
+        - 进入GEO后选择RNA-seq数据，点击进入RNA-seq的GSE数据，点击`SRA run selector`进入样本下载界面，选择好样本后导出样本的txt文件；
+        - 使用`prefetch -f no -p --option-file SRR_mh63_nippobare_rna-seq.txt`进行下载得到sra文件；
     2. 提取成fastq：
-        - 写在get_fastq_gz.sh里面；并且解压了一条gz文件，发现大小和之前解压成fastq的文件大小一致，说明应该没错；多久给忘了，大概几个小时吧；
+        - 使用`fastq-dump --split-3 --gzip -O {输出目录} {SRR目录或者sra文件都可}`将sra文件转成fastq文件，脚本写在get_fastq_gz.sh里面；并且解压了一条gz文件，发现大小和之前解压成fastq的文件大小一致，说明应该没错；多久给忘了，大概几个小时吧；
 ## 三、数据预处理
-1. 质量控制（指导数据问题在哪）
+1. 质量控制（知道数据问题在哪）
     - fastqc和MultiQC
     - 使用`ls fastq_gz/*_1.fastq.gz | sed 's/_1.fastq.gz//' | xargs -I {} echo "nohup fastqc -t 12 -o ../1_fastqc {}_1.fastq.gz {}_2.fastq.gz &" > process_fastqc.sh` 先生成脚本，然后执行；由于并行执行，耗时5分钟。并且查看了结果与之前的单个样本去运行一样，说明执行无误；
     - 使用multiqc：`python -m multiqc ./fastqc`，其中-m表示用 Python 运行一个模块，而不是一个脚本文件；一分钟不到吧；
@@ -75,7 +76,7 @@
 tophat2输出的bam文件是根据基因组位置排序而不是根据reads name进行排序的，当然HTseq对于根据根据pos或者是name都可以进行表达定量；参见 https://www.biostars.org/p/150604/ ；并且使用samtools view accepted_hits.bam | less -SN 查看了也确实是按照pos进行排序的；
 1. 使用htseq产生raw counts的数据：（批量的写成sh脚本了）
 `htseq-count -f bam -r pos -s yes -i gene_id 4_mapping_tophat/result_SRR10751892/accepted_hits.bam Oryza_sativa_mh63.MH63RS2.60.gtf > tmp_htseq/tmp_counts_gtf.txt` 或 `htseq-count -f bam -r pos -s yes -i gene_id -t gene 4_mapping_tophat/result_SRR10751892/accepted_hits.bam Oryza_sativa_mh63.MH63RS2.60.gff3 > tmp_htseq/tmp_counts.txt`，一个样本半个小时；
-2. 报错处理
+1. 报错处理
     - 报错信息
         - 使用gff文件作为输入发生报错`Error processing GFF file (line 23 of file Oryza_sativa_mh63.MH63RS2.60.gff3):Feature transcript:OsMH63_01G000010_01 does not contain a 'gene_id' attribut [Exception type: ValueError, raised in features.py:329]`
         - 而使用gtf的时候虽然提示`[E::idx_find_and_load] Could not retrieve index file for '4_mapping_tophat/res10751892/accepted_hits.bam'`，但是最终是有结果的；
