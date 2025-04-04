@@ -378,6 +378,29 @@
     - 使用clusterprofiler进行富集分析
         - 进行富集分析有很多在线工具，但是 
 3. GO富集
+    - Gene Ontology
+        - 教程：
+            - [Gene Ontology](https://www.bilibili.com/video/BV1v24y1X7B7/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
+            - [一文极速读懂 Gene Ontology （GO）数据库](https://zhuanlan.zhihu.com/p/99789859)
+        - GO Ontology：
+            1. Molecular function: Describe gene's jobs or abilities.
+                - 这里的描述只表示活动，而不指定执行功能的实体（分子或复合物），动作发生的地点，时间或背景；
+                - 为避免基因产物名称与其分子功能之间的混淆，GO分子功能通常附加“活性（activity）”一词。比如，蛋白激酶（protein kinase）具有GO分子功能：蛋白激酶活性（ protein kinase activity）
+            3. Biological process: Events or pathways.
+                - 需要注意：生物学过程不等同于通路。目前，GO没有表示完整的通路信息所需的动力学或依赖性的描述信息 
+            4. Cellular component: Describe loaction(subcellular structures, macromolecular complexes)
+            - GO terms:
+                - 每个基因都对应了不止三个GO term的ID（GO ID和GO term一一对应），整体的架构是一个类似树状的结构：
+                    - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/7dc8167424de2c5aea40893aa6bb298c.png"/> 
+                    - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250403210735.png"/>
+                    - 可以看到BP、MF、CC三者的GO term数量加起来远大于总的GO term数量，这说明有些terms出现在三者的多个分支中。
+                - GO term的关系：
+                    - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250403212331.png"/>
+        - GO Enrichment
+            - tools：AmiGo、Gorilla、GREAT、DAVID 
+            - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250403211041.png"/>
+    - GO富集原理
+        - [未看](https://mp.weixin.qq.com/s/c_Y5PVozhCtmf1qIp9WQvQ) 
     - 使用clusterprofiler进行GO注释
         - 教程：
             - [水稻（Oryza sativa）如何批量地做GO富集分析](https://mp.weixin.qq.com/s/Q6HeR6fJSEE3NB1JYWqZtA)
@@ -390,7 +413,21 @@
             - 要将基因列表的excel文件放在名为"original_file"的文件夹，注意读入的excel文件的基因ID是“LOC_Os02g43410”这种形式的基因ID，而且列名为gene_id；一个基因集放在一个excel中，可以放入不止一个excel文件在这个文件夹中；
             - [水稻的RAP MSU ID转换](https://zhuanlan.zhihu.com/p/700364719)
         3. 建立名为table和plot的文件夹，用于GO富集结果的存储
-        4. 下载Osativa_GO_enrichment.R脚本后在终端运行
+        4. 下载Osativa_GO_enrichment.R脚本后在终端运行（关闭所用的各个文件）
+            - `Rscript "Osativa_GO_enrichment.R" 当前目录的路径`
+    - 自己动手做GO富集分析
+        - 教程：
+            - [手搓一个GO富集分析](https://mp.weixin.qq.com/s/OKHx1PH9Lq5JreFnUQTV-A)
+            - [GO和KEGG富集倍数（Fold Enrichment）如何计算](https://zhuanlan.zhihu.com/p/264504322)
+        1. 获取到基因列表
+        2. 找到这些基因对应的GO注释
+            - 即根据基因名称获取到对应的GO ID，可以使用biomaRt以及org.Hs.eg.db（针对人类基因）进行获取；
+        3. 找到GO ID对应的GO term
+            - 二者一一对应； 
+        4. 统计所有的GO ID/term的频数
+            - 注意：有可能出现GO term的频数大于基因数，因为一个基因会对应多个GO term，而GO term的三个分支中可能出现相同的GO term。
+        5. 对于每一个GO term进行显著性检验(很久之前做过pfam富集)
+            - [如何手动做GO分析（包含p值，p.adj的计算）](https://blog.csdn.net/qq_26309777/article/details/106818657) 
 4. reactome富集
 ## 四、RNA-seq实验设计
 ### 相关问题
@@ -497,7 +534,7 @@
             - 上面相当于构建了一个数据库，里面包含了所有的数据，下面需要制定你的检索条件，该函数主要包含三个参数：
                 - filters和values这两个参数定义你检索的条件，比如想检索位于X染色体上所有的基因，则你的filters为"chromosome_name",value参数为"X"
                 - attributes：指定返回的结果都包含哪些信息，比如entrezgene_id；可以使用`attributes = listAttributes(ensembl);attributes[1:5,]`查看可以获取的Attributes。 
-    3. 一些相应物种的数据库可以提供ID转换
+    1. 一些相应物种的数据库可以提供ID转换
         - RIGW数据库，[Rice Information GateWay](http://rice.hzau.edu.cn/rice_rs3/)
             - 使用ZS97和MH63为参考基因组，能提供ZS97、MH63、9311和日本晴之间的直系同源基因ID的转换，并提供KEGG和GO富集工具。
             - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250307170533.png"/>

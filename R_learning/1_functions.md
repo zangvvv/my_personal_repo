@@ -13,14 +13,14 @@
         第一个路径"C:/Users/mingweiwang/AppData/Local/R/win-library/4.3"是当前用户的个人库文件夹路径，其中包括用户安装的R包。
         第二个路径"C:/Program Files/R/R-4.3.2/library"是R的系统库文件夹路径，其中包括系统安装的R包。  
     install.packages("vcd") #下载vcd包，默认是最新的
-    install.packages(c("vcd",”caer”)#下载两个或多个包
+    install.packages(c("vcd","caer")#下载两个或多个包
     library(name):加载名为name的包；或require()
     installed.packages():列出已安装的包的相关信息
     packageVersion("package_name")：查看某个包的版本信息
     search():查看当前环境中哪些包已被加载
     detach("package:vcd")：从当前环境下移除已加载的包
     update.packages():更新安装的包
-    remove.packages(“vcd”):删除已下载vcd包
+    remove.packages("vcd"):删除已下载vcd包
     ```
 2. 包内操作：
     ```
@@ -32,8 +32,8 @@
 1. 针对packages：
     ```
     help.start():打开帮助文档首页，进入浏览器
-    help(package=ggplot2)：查看包的帮助文档，””可加可不加
-    vignette(“”):可以查看更多的关于包的内容（即显示vignette文档，vignette翻译为简介）
+    help(package=ggplot2)：查看包的帮助文档，""可加可不加
+    vignette(""):可以查看更多的关于包的内容（即显示vignette文档，vignette翻译为简介）
     vignette():显示已安装包中所有可用的vignette文档
     ```
 2. 针对function：
@@ -45,7 +45,7 @@
     ```
 3. 更多搜索：
     ```
-    help.search(“”):在本地进行模糊搜索一个函数，比如搜索绘制热图heatmap的函数；也可以直接使用??heatmap进行本地搜索
+    help.search(""):在本地进行模糊搜索一个函数，比如搜索绘制热图heatmap的函数；也可以直接使用??heatmap进行本地搜索
     RSiteSearch("")：通过网络进行搜索某关键字(包括在线文档和R-Help邮件列表的讨论文章)
     apropos("sum"):列出所有包含sum字段的内容
     apropos("sum",mod="function")：搜索含sum字段且是函数的内容（或用mode）
@@ -76,9 +76,9 @@
         q():退出R，将会询问你是否保存工作空间
     ```
 #### 1.1.4 R文件输入
-source(“filename”):执行包含在该工作目录下指定文件中的R语句集合
+source("filename"):执行包含在该工作目录下指定文件中的R语句集合
 #### 1.1.5 结果输出与保存
-sink(“filename”):将以下代码的输出结果保存到指定文件中，默认情况下，若文件已经存在，则它的内容将被覆盖；参数
+sink("filename"):将以下代码的输出结果保存到指定文件中，默认情况下，若文件已经存在，则它的内容将被覆盖；参数
 sink()：仅输出到控制台
 以下是一些图片的保存:
     ```
@@ -109,8 +109,8 @@ sink()：仅输出到控制台
 2. 字符串（stringr包）
     ```
     nchar(x):计算某字符串的长度，空格也包括；若x为数值型向量，则转换成统计相应元素数字个数
-    paste(“”，“”，...,sep=“”):将字符串相连、压缩成一个字符串，没个字符串之间用sep间隔
-    paste(x,””)：x是字符型向量，表示将x中每一个字符串与“”中字符串相连
+    paste(""，""，...,sep=""):将字符串相连、压缩成一个字符串，没个字符串之间用sep间隔
+    paste(x,"")：x是字符型向量，表示将x中每一个字符串与""中字符串相连
     substr(x=char_vector_name,start=a,stop=b):提取字符型向量中每一个字符串从a到b个字符
     chartr(old, new, x)：old是需要替换的字符，new是替换后的字符，x是被替换的字符向量；就是将x中出现的所有的old字符（识别到单个）换成new字符
     toupper(x):将字符型向量中字符变成大写
@@ -119,7 +119,7 @@ sink()：仅输出到控制台
     grep:查看有没有匹配的元素
     match()
     strsplit:字符串分割
-    outer(obj1,obj2,FUN=paste,seq=””):将两个对象进行组合，得到obj1\*obj2个对象，最后用paste进行连接,连接符为seq
+    outer(obj1,obj2,FUN=paste,seq=""):将两个对象进行组合，得到obj1\*obj2个对象，最后用paste进行连接,连接符为seq
     ```
 3. 日期和时间
     - 时间序列分析：包括对时间序列的描述、利用前面的结果进行预测

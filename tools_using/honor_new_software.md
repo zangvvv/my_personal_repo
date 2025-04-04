@@ -44,23 +44,39 @@
                 - 所需的插件相应升级一下，之前常用的模板代码都有自定义过，后续需自己更新；
                 - 之前用的Zotero6的笔记依旧可查改（后续再看）。
                 - 用模板生成笔记的位置变了。[未看](https://www.bilibili.com/video/BV17vvee6Eoj/?spm_id_from=333.337.search-card.all.click&vd_source=2523c7055f0985a7f47ca59739b6b086)
-6. anaconda
-    - 教程：[一步步教你在 Windows 上轻松安装 Anaconda以及使用常用conda命令（超详细）](https://blog.csdn.net/Natsuago/article/details/143081283)
-    1. 下载anaconda安装程序
-        - 打开[Anaconda 官方网站](https://www.anaconda.com/download)。登陆后点击Free Download免费下载适合自己操作系统的anaconda安装包；
-        - 或者使用一些大学的开源软件镜像站[清华大学镜像站](https://repo.anaconda.com/archive/)
-    2. 运行安装程序并接受许可协议
-    3. 选择安装类型并设置安装路径（建议放在非系统盘，保证路径中不要出现中文或特殊符号，例如空格或感叹号等）
-    4. 高级安装选项
-        - Register Anaconda as the system Python：表示将使anaconda成为系统中的默认Python版本，这意味着当您在任何命令提示符窗口中输入 python 时，系统将默认使用 Anaconda 的 Python 解释器。如果 Anaconda 是您唯一的或主要的 Python 环境，推荐勾选此项。这样可以让其他程序，如 VSCode 或 PyCharm，自动识别 Anaconda 为系统的主 Python 版本。
-        - Clear the package cache upon completion：安装完后清楚缓存包；
-    5. 配置环境变量
-        - 开始菜单——输入环境变量——编辑系统环境变量——高级——环境变量——系统变量——点击Path进行编辑——添加Anaconda路径：
-            ```
-            D:\anaconda3
-            D:\anaconda3\Scripts
-            D:\anaconda3\Library\bin
-            D:\anaconda3\Library\mingw-w64\bin  # 可选，用于编译 C/C++ 代码
-            D:\anaconda3\Library\usr\bin        # 可选，用于 UNIX 工具的兼容
-            ``` 
-        - 完成之后可以打开cmd输入`conda --version`进行验证
+6. Anaconda
+    - anaconda（windows）
+        - 教程：[一步步教你在 Windows 上轻松安装 Anaconda以及使用常用conda命令（超详细）](https://blog.csdn.net/Natsuago/article/details/143081283)
+        1. 下载anaconda安装程序
+            - 打开[Anaconda 官方网站](https://www.anaconda.com/download)。登陆后点击Free Download免费下载适合自己操作系统的anaconda安装包；
+            - 或者使用一些大学的开源软件镜像站[清华大学镜像站](https://repo.anaconda.com/archive/)
+        1. 运行安装程序并接受许可协议
+        2. 选择安装类型并设置安装路径（建议放在非系统盘，保证路径中不要出现中文或特殊符号，例如空格或感叹号等）
+        3. 高级安装选项
+            - Register Anaconda as the system Python：表示将使anaconda成为系统中的默认Python版本，这意味着当您在任何命令提示符窗口中输入 python 时，系统将默认使用 Anaconda 的 Python 解释器。如果 Anaconda 是您唯一的或主要的 Python 环境，推荐勾选此项。这样可以让其他程序，如 VSCode 或 PyCharm，自动识别 Anaconda 为系统的主 Python 版本。
+            - Clear the package cache upon completion：安装完后清楚缓存包；
+        4. 配置环境变量
+            - 开始菜单——输入环境变量——编辑系统环境变量——高级——环境变量——系统变量——点击Path进行编辑——添加Anaconda路径：
+                ```
+                D:\anaconda3
+                D:\anaconda3\Scripts
+                D:\anaconda3\Library\bin
+                D:\anaconda3\Library\mingw-w64\bin  # 可选，用于编译 C/C++ 代码
+                D:\anaconda3\Library\usr\bin        # 可选，用于 UNIX 工具的兼容
+                ``` 
+            - 完成之后可以打开cmd输入`conda --version`进行验证
+    - linux下安装Anaconda
+        - 正常一个用户只安装一个应该是比较简单的； 
+        - [一个用户下安装多个Anaconda（基本不会用到吧）](https://www.cnblogs.com/q-zl/p/15270934.html) 
+            - 对于一个用户目录下下载第二个Anaconda时，按照一般的安装步骤会把Anaconda进行初始化，base环境被重置到第二个Anaconda（因为一个用户只有一个base）。如果需要更改回原来路径的Anaconda，可以使用vi ~/.bashrc打开配置文件，将下面红的全部换成原来路径即可；
+                - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250327215734.png"/>
+            - [如果安装了两个anaconda，如何切换base：（还有迁移虚拟环境）](https://www.jianshu.com/p/7ade3b78220e)
+                - 示例：`source /home/matthew/test_env/miniconda3/bin/activate` 
+              
+7. 白鲸加速器
+    - 教程：
+        - [利用雷电模拟器白嫖白鲸加速器（免费一个月和安易加速器（免费7天但网速佳）](https://www.youtube.com/watch?v=nq-gFqEZHGI) 删除可能要到原路径software-雷神加速器下删除）
+    - 使用：
+        1. 下载白鲸加速器后；加速器注册前两个用户是不需要邮箱验证的，随便输就行；
+        2. 两个用户注册用完后，就用模拟器多开或应用分身做一个新的（用过的分身全都不能再用了，目前已用完MUMU模拟器的N20），然后可以再拥有两个注册的权限；
+        3. 可以不断给一个用户使用邀请码（大号邮箱，常密）：NWJ2Y；提高网速（100%）和时长（26年8月）；小号邮箱（密码为早古密码）时间短一点（邀请码为G9LUA）。

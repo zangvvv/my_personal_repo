@@ -235,10 +235,26 @@
     - 命令如下：`samtools view ./1-1-1Aligned.toTranscriptome.out.bam | less -SN`
     - 这个bam文件是根据name进行排序的，但是有几点问题：它的第三列是转录本ID而不是染色体名称；而且它的MPOS和ISIZE列都是0，但是CIGAR/比对模式都是150M，都能够match上。
     - 只要是经过排序，不管是根据fragment name还是根据pos；
-3. 鉴定数据的建库方式
-    - 由于MSU没有提供对应的gtf文件，所以只能看看Ensembl的GTF文件可不可行。同样将其下载到`/gss1/home/huangju02/hj/vvv/rice3k/NIP_genome_data/ensemble`之后再用软链接到`/gss1/home/huangju02/hj/vvv/RNA_seq`下面。
-
-
-
+3. 鉴定数据的建库方式（失败）
+    1. 准备bed文件
+        - 由于MSU没有提供对应的gtf文件，所以只能看看Ensembl的GTF文件可不可行。同样将其下载到`ln -s /gss1/home/huangju02/hj/vvv/rice3k/NIP_genome_data/ensembl_data/`之后再用软链接到`/gss1/home/huangju02/hj/vvv/RNA_seq`下面。
+        - 执行`gtfToGenePred ../Oryza_sativa.IRGSP-1.0.60.chr.gtf Oryza_sativa.IRGSP-1.0.60.chr.genePred`以及`genePredToBed Oryza_sativa.IRGSP-1.0.60.chr.genePred Oryza_sativa.IRGSP-1.0.60.chr.bed`
+    2. 使用infer_experiment.py程序
+        - `infer_experiment.py -i ../01_bam_files/1-1-1Aligned.toTranscriptome.out.bam -r all.bed -q 20` 
+        - 最后果然还是不行。建议尝试使用gffread将gff转换成gtf，[something like gffread my.gff3 -T -o my.gtf](https://www.biostars.org/p/234181/)。结果是：使用了gffread转换后的gtf文件依旧没用，报同样的报错：`Unknown Data type`，猜测可能是前期比对的过程与当前所用的文件不一致。
+4. 对新发的rawbam鉴定建库方式
+    1. 查看bam文件确定其染色体名称为chr01，而获取到的gtf文件的染色体名称为Chr1，`sed 's/^Chr\([0-9]\)\b/chr0\1/' all.gtf > processed.gtf`；
+    2. 准备bed文件：`gtfToGenePred ./processed.gtf rseqc/processed.genePred` 和 `genePredToBed rseqc/processed.genePred rseqc/processed.bed`
+    3. 使用infer_experiment.py程序：`cd rseqc/`和`infer_experiment.py -i ../02_rawbam/1-1-1.rg.markdup.split.bam -r processed.bed -q 20`：结果为非特异性。
+        - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250401113432.png"/>
+        - 警告信息暂时忽略。
+5. 利用htseq进行表达定量
+    1. 先改造gff文件的染色体名称：`sed 's/^Chr\([0-9]\)\b/chr0\1/' all.gff3 > processed_nip7.gff3`；
+    2. 新的bam文件的排序方式，是根据pos排序的；
+    3. 编写脚本执行htseq
+6. 根据htseq的结果count.txt生成可以用于DESeq2的表达矩阵文件
+7. 利用DESeq2进行差异基因筛选；
+### 三种方法的差异基因集     
+将根据Wilcoxon检验、直接计算log2FC以及用DESeq2计算的差异基因集绘制韦恩图。
 
 

@@ -143,15 +143,15 @@ str(object):查看对象信息
         列表访问：
         list_name[n]:访问第一个列（元素）
         list_name[c()]:访问c（）的列（元素）
-        list_name[c(“name1”,”name2”)]：通过名称访问
+        list_name[c("name1","name2")]：通过名称访问
         list_name$name:访问name这个元素
-        list_name[[n]]:与list_name[n]不一样，输出的是第n个元素本身的数据结构，而后者数据结构是list；也可以吧n换成”name”
+        list_name[[n]]:与list_name[n]不一样，输出的是第n个元素本身的数据结构，而后者数据结构是list；也可以吧n换成"name"
         list_name[[n]]<-x:给list中第n个元素修改成x；删除就是利用负索引或NULL
     ```
 ### 2.6 因子（理解为因子型数据类型）
 1. 因子的特性
     - 直接用字符变量也可以表示分类变量，但它只有字母顺序，不能规定想要的顺序，也不能表达有序分类变量。所以，有必要把字符型的分类变量转化为因子型，这更便于对其作后续描述、汇总、建模等（计算频数、独立性检验、相关性检验、方差分析、主成分分析、因子分析等）
-    - 类别变量(名义型)和有序类别变量(有序型)在R中称为因子。因子本质上是一个带有level属性的整数向量，其中“水平level”是指事前确定可能取值的有限集合，例如性别：男，女。因子在R中非常重要，因为它决定了数据的分析方式及如何进行视觉呈现。
+    - 类别变量(名义型)和有序类别变量(有序型)在R中称为因子。因子本质上是一个带有level属性的整数向量，其中"水平level"是指事前确定可能取值的有限集合，例如性别：男，女。因子在R中非常重要，因为它决定了数据的分析方式及如何进行视觉呈现。
     - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250326171409.png"/>
     - 函数factor()创建
         名义型：没有顺序之分的类别变量，表示类型
@@ -167,24 +167,25 @@ str(object):查看对象信息
     有序因子：
     factor(x,ordered=TRUE):将向量x存储为有序型变量的因子。
     如果x是字符型vector，各水平排序顺序根据字母顺序而定；或者通过指定levels来覆盖默认排序：
-    factor(x,ordered=TRUE,levels=c(“”,””)):各水平排序顺序则是修改为c(“”,“”)中所指定的顺序；若x有，但未在参数中列举的元素将被设置为缺失值。
+    factor(x,ordered=TRUE,levels=c("","")):各水平排序顺序则是修改为c("","")中所指定的顺序；若x有，但未在参数中列举的元素将被设置为缺失值。
     如果x是数值型量：
-    factor(x,levels=c( , ),labels=c(“”,””)):标签的顺序和水平一致，levels中的数值是数值型变量x中有的值，同样x有但不在levels中的将被设为缺失值；labels中的字符串将代替原数值输出
+    factor(x,levels=c( , ),labels=c("","")):标签的顺序和水平一致，levels中的数值是数值型变量x中有的值，同样x有但不在levels中的将被设为缺失值；labels中的字符串将代替原数值输出
     cut(x,c(seq(a,b,n)))：将向量x按照从a-b，每间隔n作一个区间对x进行分类
 ```
 ## 三、数据的输入
 数据输入的方法包括从键盘输入（edit函数）、直接在代码中嵌入数据集、现有文本文件导入、从Excel电子表格、统计软件、数据库导入、在线导入。
 ### 3.1 从带分隔符的纯文本文件导入数据
-1. 使用read.table（）函数从带分隔符的文本文件中导入数据。此函数可读入一个表格格式的文件并将其保存为一个数据框，压缩文件.gz也能读。将read.table第一个参数换成网络文件具体位置就可以读取在线数据。还可以读取剪切板。
-    - 使用格式为：`mydataframe<-read.table(“file_name”,options)`；
-    - options有：
-        header:第一行是否是变量名，header=TRUE表示可以将文件的第一行设置为文件名
-        sep:读取文件时进行分割的间隔符，sep=”\\t”为制表符；读入.csv文件时应为sep=“,”（或使用read.csv()读取）。
-        comment.char = '\!'：当读取文件时，以’\!'开头的行文本将被视为注释并被忽略。
-        colClasses=c(“”,””)：指定读取的数据类型
-        row.names=””:指定标识符，被指定的列将没有标签
-        nrows=n：读取n行数据
-    - read.table(gzfile(“.gz”)):直接读取压缩文件，或直接利用read.table(“.gz”) 
+1. 使用read.table()函数。
+    - 简介
+        - 此函数可读入一个表格格式的文件并将其保存为一个数据框，压缩文件.gz也能读。将read.table第一个参数换成网络文件具体位置就可以读取在线数据。还可以读取剪切板。
+    - 使用格式为：`mydataframe<-read.table("file_name",options)`；其中options有：
+        - header:第一行是否是变量名，header=TRUE表示可以将文件的第一行设置为文件名
+        - sep:读取文件时进行分割的间隔符，sep="\t"为制表符（即tsv文件）；读入csv文件时应为sep=","（或使用read.csv()读取）。
+        - comment.char = '!'：当读取文件时，以’!'开头的行文本将被视为注释并被忽略。
+        - colClasses=c("","")：指定读取的数据类型
+        - row.names=1：将第一列内容设置为行名；
+        - nrows=n：读取n行数据
+    - read.table(gzfile(".gz")):直接读取压缩文件，或直接利用read.table(".gz") 
 ### 3.2 导入Excel数据
 1. 第一种 R自带操作
 如果Excel文件在当前工作目录下，直接在右下的file窗口里左击该待导入文件——import dataset即可完成导入（出现报错有可能是rlang和vctrs等包的版本过旧）
@@ -195,22 +196,23 @@ str(object):查看对象信息
 ### 3.3 数据写出
 1. 相关函数
         ``` 
-        write(x,file=”x.txt”,sep=”..”)
-        write.table(data,file_name,sep=…):将数据写入文本文件
+        write(x,file="x.txt",sep="..")
+        write.table(data,file = ,sep=…):将数据写入文本文件
         write.csv(data, file_name = "文件路径/文件名.csv", row.names = FALSE):写入到新的csv文件；R每次读取文件会默认加一个行号，利用参数row.names=FALSE来使之不加，还有col.names=F表示不写入列名；
         ```
     - 参数：
         - quote=FALSE:字符串不加双引号
+        - row.names = FALSE:不保留行名
         - append=TRUE:表示将该data添加到现有文件的末尾而不清除原数据；默认是FALSE，表示覆盖现有文件；
         - 写成其它软件支持的格式可以使用foreign包，不开源就不行
 ### 3.4 文件压缩与解压
 1. 相关函数
         ```
-            zip(“file_name”,“file_name2”):第一个参数输入压缩后的文件名，第二个参数输入压缩前的文件名，该函数未执行成功
+            zip("file_name","file_name2"):第一个参数输入压缩后的文件名，第二个参数输入压缩前的文件名，该函数未执行成功
             unzip()：需要解压的文件名
             tar()：第一个参数输入压缩后的文件名，第二个参数输入压缩前的文件名
             untar()：解压缩
-            write.table(x,gzfile(“.gz”):将数据直接写成压缩文件
+            write.table(x,gzfile(".gz"):将数据直接写成压缩文件
         ```
     - R中默认没有解压相关文件的函数？？，需要使用一个包：R.utils:
         ``` 

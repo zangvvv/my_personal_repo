@@ -45,7 +45,7 @@
                     gtfToGenePred ../Oryza_sativa_mh63.MH63RS2.60.gtf Oryza_sativa_mh63.MH63RS2.60.genePred
                     genePredToBed Oryza_sativa_mh63.MH63RS2.60.genePred Oryza_sativa_mh63.MH63RS2.60.bed
                     ```
-            3. 使用infer_experiment.py程序
+            3. 使用infer_experiment.py程序（提供的gtf好像需要与比对所用的一致）
                 - 主要命令：`infer_experiment.py -i ../4_mapping_tophat/result_SRR10751892/accepted_hits.bam -r Oryza_sativa_mh63.MH63RS2.60.bed -q 20`
                     - -i 比对生成的bam文件（可以不用排序）
                     - -r gtf转bed12文件产生的bed文件。
