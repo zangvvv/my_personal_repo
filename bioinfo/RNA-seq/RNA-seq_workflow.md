@@ -386,9 +386,9 @@
             1. Molecular function: Describe gene's jobs or abilities.
                 - 这里的描述只表示活动，而不指定执行功能的实体（分子或复合物），动作发生的地点，时间或背景；
                 - 为避免基因产物名称与其分子功能之间的混淆，GO分子功能通常附加“活性（activity）”一词。比如，蛋白激酶（protein kinase）具有GO分子功能：蛋白激酶活性（ protein kinase activity）
-            3. Biological process: Events or pathways.
+            2. Biological process: Events or pathways.
                 - 需要注意：生物学过程不等同于通路。目前，GO没有表示完整的通路信息所需的动力学或依赖性的描述信息 
-            4. Cellular component: Describe loaction(subcellular structures, macromolecular complexes)
+            3. Cellular component: Describe loaction(subcellular structures, macromolecular complexes)
             - GO terms:
                 - 每个基因都对应了不止三个GO term的ID（GO ID和GO term一一对应），整体的架构是一个类似树状的结构：
                     - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/7dc8167424de2c5aea40893aa6bb298c.png"/> 
@@ -396,6 +396,22 @@
                     - 可以看到BP、MF、CC三者的GO term数量加起来远大于总的GO term数量，这说明有些terms出现在三者的多个分支中。
                 - GO term的关系：
                     - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250403212331.png"/>
+        - GO 数据库：
+            - 教程：
+                - [AmiGO2:在线浏览和查询GO信息的利器](https://www.cnblogs.com/wangshicheng/p/10122724.html)
+                - [如何下载感兴趣的基因集（GO数据库）](https://www.jianshu.com/p/b1fc09e997c8) 
+            - 简单使用：
+                - GO数据库上提供了一个基于网页的查询和可视化工具[AmiGO](https://amigo.geneontology.org/amigo/landing)，用于方便的浏览，查询和下载对应信息；还有Tools可以对某个Go Terms 在整个GO 数据库中的位置进行可视化。
+                1. 按照关键词搜索数据库
+                    - 搜索多个关键词时，若直接使用空格连接，则逻辑关系为OR。若要以AND关系搜素，需要加上双引号。search功能提供了三种查询方法：
+                        - Gene product：如果希望检索基因或者基因产物相关内容可以用这个，它会返回对应的来源和蛋白家族、注释来源等信息；
+                        - Ontology：如果希望针对某个功能或过程去检索它相关的GO term、所属分类等信息，点进去可以看见该term对应的gene。
+                        - Any/Annotations：提供所有的相关的GO注释信息。
+                2. 下载
+                    - 点Custom DL这个按钮来下载；
+            - 批量获取特定功能的基因：
+                - [如何快速批量寻找并获取与感兴趣功能（如“氧化应激”）有关的基因](https://mp.weixin.qq.com/s/SNRltrBG0V2_t6ndfX8TlQ)
+                1. 在GO检索想要的功能条目（Ontology）
         - GO Enrichment
             - tools：AmiGo、Gorilla、GREAT、DAVID 
             - <img src="https://zangvvv-img.oss-cn-nanjing.aliyuncs.com/figure_bed/20250403211041.png"/>
